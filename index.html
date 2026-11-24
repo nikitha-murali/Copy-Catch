@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#d8d0dd">
+  <meta name="description" content="Find copied code across a whole class, even after variables are renamed.">
+  <title>CopyCatch — Code similarity detector</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="index.html" aria-label="CopyCatch home">CopyCatch</a>
+  <nav aria-label="Main navigation"><a class="on" href="index.html">Detector</a><a href="how.html">Explore algorithms</a></nav>
+</header>
+<main id="top">
+  <section class="intro" aria-labelledby="heroTitle">
+    <div class="hero-copy">
+      <h1 id="heroTitle">Copy<br>Catch<span>.</span></h1>
+      <p class="hero-promise">From source code to evidence. Find copied code across a class, even when variables are renamed.</p>
+      <div class="hero-actions"><button id="heroSample" class="hero-sample" type="button">Try sample files</button><a class="hero-own" href="#upload">or add your own</a></div>
+    </div>
+    <figure class="algorithm-console" aria-label="Live animation of CopyCatch analysis code being formed"><figcaption class="algo-console-top"><span>CopyCatch / analysis pipeline</span><span class="algo-live"><i></i>Running</span></figcaption><div class="algo-stream" id="algoStream" aria-hidden="true"><div class="algo-line"><i>01</i><code data-code="const tokens = tokenize(file.text);"></code></div><div class="algo-line"><i>02</i><code data-code="const grams = kgramHashes(tokens.ids);"></code></div><div class="algo-line"><i>03</i><code data-code="const fingerprints = winnow(grams);"></code></div><div class="algo-line"><i>04</i><code data-code="index.get(hash).push(fileIndex);"></code></div><div class="algo-line"><i>05</i><code data-code="unionFind.union(pair.a, pair.b);"></code></div></div><div class="algo-stages" id="algoStages"><b>Source</b><span>Tokens</span><span>Fingerprints</span><span>Index</span><b>Evidence</b></div></figure>
+  </section>
+
+
+
+  <section class="documents" id="upload" aria-labelledby="uploadTitle">
+    <div class="documents-heading"><div class="step-mark">01 / FILES</div><div><h2 id="uploadTitle">Add a class of code files</h2><p>Choose source files or drop them on the graph. Each curve summarizes common code tokens; match scores come from shared code chunks.</p></div></div>
+    <div class="document-workspace">
+      <aside class="document-list-panel" aria-label="Selected source files">
+        <div class="intake-actions">
+          <label class="button primary add-files" for="files">Add files</label>
+          <button id="sample" class="button" type="button">Try with sample files</button>
+          <button id="removeAll" class="button remove-all" type="button">Remove all</button>
+          <input type="file" id="files" multiple hidden accept=".js,.jsx,.ts,.tsx,.py,.java,.c,.h,.cpp,.cs,.go,.rs,.php,.rb,.swift,.kt,.txt,.html,.css">
+        </div>
+        <div class="file-list-heading"><span>Files in this batch</span><span id="fileCount">0 files</span></div>
+        <div id="fileList" class="file-list"><div class="file-list-empty"><b>No files yet.</b><span>Add files above or try the sample batch.</span></div></div>
+      </aside>
+      <div class="plot-area" id="drop" aria-label="Drop source files here">
+        <div class="plot-toolbar"><span id="waveCount">0 signatures</span><div class="plot-controls" aria-label="Plot zoom controls"><button type="button" id="zoomIn" aria-label="Zoom in">+</button><button type="button" id="zoomOut" aria-label="Zoom out">−</button><button type="button" id="zoomReset" aria-label="Reset graph">⌂</button></div></div>
+        <svg id="signaturePlot" class="signature-plot" viewBox="0 0 1000 520" role="img" aria-label="Code structure curves for each source file"></svg>
+        <div class="plot-drop-label" id="plotDropLabel">Drop source files here</div>
+        <div class="plot-hint">Hover a file to highlight its curve. Select a curve to locate its file.</div>
+      </div>
+    </div>
+  </section>
+
+
+
+  <div class="toolbar">
+    <div class="actions"><button id="stress" class="button" type="button">Check 300-file performance</button><button id="csv" class="button" type="button" hidden>Download CSV report</button></div>
+    <label class="range">Flag matches at <b id="thv">50</b>% or higher <input type="range" id="th" min="10" max="100" value="50"></label>
+  </div>
+
+  <section id="results" class="results-zone" aria-label="Similarity results">
+    <div id="banner" class="banner" role="status" aria-live="polite" hidden></div>
+    <div id="steps" class="pipeline" aria-label="Analysis stages" hidden></div>
+    <div class="layout">
+      <section class="card result-card"><div class="section-head"><div><h2>Most suspicious pairs</h2><p class="section-help">Start here. Compare the highlighted lines before drawing conclusions.</p></div></div><div id="pairs"><span class="empty">Add files or try the sample batch to see possible matches.</span></div></section>
+      <section class="card result-card review-card"><div class="section-head"><div><h2>Files to review</h2><p class="section-help">Each file's closest match.</p></div></div><div id="board"><span class="empty">Your review list will appear here.</span></div></section>
+    </div>
+    <section class="card diff-card" id="diffcard" tabindex="-1" role="region" aria-label="Side-by-side code comparison" hidden><div class="section-head"><div><h2 id="difftitle"></h2></div><button id="closediff" class="button" type="button">Close</button></div><p class="legend"><i class="k hit"></i> Same lines, same order <i class="k mv"></i> Shared code, moved or reordered</p><div class="diff"><pre id="da"></pre><pre id="db"></pre></div></section>
+  </section>
+
+  <section class="card graph-card" id="graphCard"><div class="section-head"><div><h2>Copying groups</h2><p class="section-help">The largest flagged group is highlighted; other files stay scattered.</p></div><div class="graph-tools"><div class="graph-zoom" aria-label="Graph zoom"><button id="ringZoomOut" type="button" aria-label="Zoom out">−</button><button id="ringZoomReset" type="button" aria-label="Reset zoom">⌂</button><button id="ringZoomIn" type="button" aria-label="Zoom in">+</button></div></div></div><p class="legend">Each dot is a file. The ring holds files connected above your selected similarity threshold. Other files are shown without links.</p><div class="graph-meta"><span id="graphSummary">Waiting for files</span><span>Similarity is a review signal, not a verdict.</span></div><div id="graph" class="rings"><div class="empty-map"><b>Your file groups will appear here.</b><span>Add source files above or try the sample files.</span><button class="button empty-sample" type="button" >Try with sample files</button></div></div><div id="clean" class="clean"></div></section>
+
+  <section class="card matrix-card" id="heatcard" hidden><div class="section-head"><div><h2>Similarity matrix</h2><p class="section-help">Darker cells show pairs with more code in common.</p></div></div><div id="heat" class="heat"></div></section>
+
+</main>
+<footer>CopyCatch helps teachers review possible matches. Similarity is a review signal, not a verdict. <a href="how.html">Explore algorithms</a></footer>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1130 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CopyCatch - Explore algorithms</title><style>:root{--bg:#d8d0dd;--fg:#36454F;--mut:#59646b;--card:#e7e1ea;--bd:#b3a9b8;--ac:#825F87;--ac2:#825F87;--bad:#36454F;--warn:#36454F;--ok:#825F87;--hit:#d3c6dc;--mv:#e4dbea;--board:#36454F;--boardfg:#e7e1ea;--rgb:130,95,135}
+@media(prefers-color-scheme:dark){:root{--bg:#36454F;--fg:#e7e1ea;--mut:#b3a9b8;--card:#36454F;--bd:#59646b;--ac:#825F87;--ac2:#FFD700;--bad:#FFD700;--warn:#FFD700;--ok:#825F87;--hit:#825F87;--mv:#825F87;--board:#36454F;--rgb:140,143,255}}
+*{box-sizing:border-box}
+body{margin:0 auto;max-width:1080px;padding:20px 16px 48px;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+h1{font:700 40px/1.1 Georgia,"Times New Roman",serif;margin:8px 0;letter-spacing:-.5px;background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);margin:0 0 12px;max-width:68ch}
+.how summary{cursor:pointer;font-weight:600}.how p{margin:8px 0 0;color:var(--mut);max-width:80ch}
+.drop{display:flex;flex-direction:column;align-items:center;gap:2px;padding:24px;border:2px dashed var(--bd);border-radius:16px;background:var(--card);cursor:pointer;text-align:center;transition:.2s}
+.drop span{color:var(--mut);font-size:13px}.drop:hover,.drop.over{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 8%,var(--card))}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
+button{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:7px 14px;cursor:pointer;transition:.15s}
+button:hover:not(:disabled){border-color:var(--ac);color:var(--ac)}button:disabled{opacity:.45;cursor:default}
+button:focus-visible,.drop:focus-within{outline:2px solid var(--ac);outline-offset:2px}
+.range{margin-left:auto;display:flex;gap:10px;align-items:center;color:var(--mut)}input[type=range]{accent-color:var(--ac)}
+.banner{padding:12px 16px;border-radius:12px;margin-bottom:12px;background:color-mix(in srgb,var(--bad) 12%,var(--card));border:1px solid color-mix(in srgb,var(--bad) 40%,var(--bd));font-size:16px}
+.banner.ok{background:color-mix(in srgb,var(--ok) 12%,var(--card));border-color:color-mix(in srgb,var(--ok) 40%,var(--bd))}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:6px}
+.steps div{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px}.steps b{display:block}.steps em{display:block;font-style:normal;font-size:18px;color:var(--ac);margin:2px 0}.steps small{color:var(--mut);display:block;line-height:1.35}
+.time{font-size:12px;color:var(--mut);margin:0 0 12px}
+.two{display:grid;grid-template-columns:1.15fr 1fr;gap:12px;align-items:start}@media(max-width:780px){.two{grid-template-columns:1fr}.range{margin-left:0}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}.card h3{margin:0 0 8px;font-size:15px}
+.board{background:var(--board);color:var(--boardfg);border-color:transparent}
+svg{width:100%;display:block;background:radial-gradient(circle at 50% 45%,rgba(130,95,135,.14),transparent 70%);border-radius:10px}
+.edge{cursor:pointer;opacity:.6;transition:.15s}.edge:hover{opacity:1}.faded{opacity:.08!important}.node{cursor:pointer;transition:.15s}.node.faded{opacity:.25!important}
+svg text{fill:var(--boardfg);font-size:10px;text-anchor:middle;pointer-events:none}svg .pct{font-size:9px;fill:#d3c6dc}
+.key{list-style:none;margin:8px 0;padding:0;font-size:12.5px;color:#c7b9d0;display:grid;gap:3px}
+.dot,.ln{display:inline-block;margin-right:8px;vertical-align:middle;background:#825F87}.dot{width:10px;height:10px;border-radius:50%}.dot.big{width:15px;height:15px}.ln{width:20px;height:4px;border-radius:2px}
+.fcard{background:rgba(255,255,255,.06);border-radius:10px;padding:10px;font-size:13.5px;margin-top:6px}.fcard button{background:transparent;color:inherit;border-color:#825F87;padding:1px 8px;font-size:12px}
+.groups{margin-top:8px;font-size:13px}.pill{display:inline-block;padding:1px 10px;border-radius:12px;margin:2px;color:#111;font-size:12px;font-weight:600}
+.row{display:grid;grid-template-columns:1fr auto;gap:3px 8px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:14px;align-items:center}.row:last-child{border:0}
+.bar2{grid-column:1/3;height:6px;background:var(--bd);border-radius:4px;overflow:hidden}.bar2 i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2))}
+.row button{padding:2px 10px;font-size:12px}.badge{font-size:11.5px;padding:1px 8px;border-radius:10px;margin-left:6px;font-weight:600}
+.hi{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}.mid{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}.lo{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.empty{color:var(--mut)}.legend{font-size:12.5px;color:var(--mut);margin:0 0 8px}.k{display:inline-block;width:12px;height:12px;border-radius:3px;margin:0 4px 0 12px;vertical-align:-2px}.k:first-of-type{margin-left:0}
+.heat{display:grid;gap:2px;font-size:11px;overflow:auto}.heat div{padding:4px;border-radius:4px;text-align:center;min-width:26px}.heat .c{cursor:pointer;color:var(--fg)}.heat .c:hover{outline:2px solid var(--ac)}.heat .l{text-align:right;color:var(--mut);white-space:nowrap}
+.diff{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media(max-width:780px){.diff{grid-template-columns:1fr}}
+pre{margin:0;overflow:auto;font:12px/1.6 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:6px 0;max-height:380px}
+pre span{display:block;padding:0 8px;white-space:pre}pre i{display:inline-block;width:2.5em;color:var(--mut);font-style:normal;user-select:none}
+.hit,.k.hit{background:var(--hit)}.mv,.k.mv{background:var(--mv)}
+nav{display:flex;gap:8px;margin:6px 0 14px}nav a{padding:5px 14px;border-radius:20px;border:1px solid var(--bd);color:var(--mut);text-decoration:none;background:var(--card)}nav a.on{color:#fff;background:var(--ac);border-color:var(--ac)}
+.howlink{display:block;margin:0 0 12px;color:var(--ac)}
+.rings{display:grid;gap:12px}.ring{border:1px solid var(--bd);border-radius:12px;padding:10px;background:var(--bg)}.ring h4{margin:0 0 4px;font-size:14px}.ring svg{background:none}
+.sw{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:8px;vertical-align:-1px}
+.nd rect{fill:var(--card);stroke-width:3}svg .nd text{fill:var(--fg);font-size:11.5px;font-weight:600}svg .lb text{fill:#fff;font-size:10.5px;font-weight:700}.lb{cursor:pointer}
+.clean{margin-top:10px;font-size:13px;color:var(--mut)}.chip{display:inline-block;padding:1px 9px;border-radius:10px;border:1px solid var(--bd);margin:2px;background:var(--bg)}
+/* how page */
+.how2 h2{margin:0 0 4px;font-size:19px}.how2 p{color:var(--mut);margin:4px 0 10px;max-width:75ch}.how2 textarea{width:100%;height:96px;font:12.5px ui-monospace,Menlo,monospace;background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:8px;padding:8px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:700px){.cols{grid-template-columns:1fr}}
+.tks{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}.tk{display:inline-flex;flex-direction:column;align-items:center;min-width:26px;padding:2px 6px;border-radius:6px;border:1px solid var(--bd);background:var(--bg);font:12px ui-monospace,Menlo,monospace}.tk small{font-size:9.5px;color:var(--mut);min-height:12px}
+.tk.ch{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 14%,var(--bg))}.tk.w{background:color-mix(in srgb,var(--ac) 25%,var(--bg));border-color:var(--ac)}.tk.out{background:color-mix(in srgb,var(--bad) 25%,var(--bg));border-color:var(--bad)}.tk.in{background:color-mix(in srgb,var(--ok) 28%,var(--bg));border-color:var(--ok)}
+.tk.kept{background:var(--ac);color:#fff}.tk.min{outline:2px solid var(--ac2)}
+.res{padding:8px 12px;border-radius:8px;font-weight:600}.res.ok{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}.res.bad{background:color-mix(in srgb,var(--bad) 14%,transparent);color:var(--bad)}
+.ctl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:6px 0;color:var(--mut);font-size:13px}.ctl input[type=range]{accent-color:var(--ac)}
+.idx .r{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;padding:3px 8px;font:12.5px ui-monospace,Menlo,monospace;border-bottom:1px solid var(--bd)}.idx .r.sh{background:color-mix(in srgb,var(--ac) 14%,transparent);font-weight:700}.idx .hd{color:var(--mut)}
+.dp{border-collapse:collapse;font-size:12px;margin:8px 0}.dp td,.dp th{border:1px solid var(--bd);padding:4px 6px;text-align:center;min-width:34px}.dp th.v{writing-mode:vertical-rl;font-weight:500;height:90px}.dp th.l{text-align:right;font-weight:500;white-space:nowrap}
+.dp td.hid{background:var(--bg)}.dp td.eq{background:var(--hit)}.dp td.pth{outline:2px solid var(--ac2);outline-offset:-2px;font-weight:700}
+.un{display:inline-flex;flex-direction:column;align-items:center;width:64px;padding:8px 0;border-radius:12px;color:#111;font-weight:700;margin:3px;transition:.3s}.un small{font-weight:400;font-size:10.5px}
+.edgesl span{display:inline-block;padding:2px 10px;border:1px solid var(--bd);border-radius:12px;margin:2px;font-size:13px}.edgesl span.done{background:var(--ac);color:#fff;border-color:var(--ac)}
+/* algorithm lab */
+.over{width:100%;border-collapse:collapse;font-size:13.5px}.over th{text-align:left;color:var(--mut);font-weight:600;padding:6px 8px}.over td{padding:8px;border-top:1px solid var(--bd);vertical-align:top}.over code,.where code{font:12.5px ui-monospace,Menlo,monospace;background:var(--bg);padding:1px 6px;border-radius:5px}
+.over tr.on td{background:color-mix(in srgb,var(--ac) 10%,transparent)}
+.where{font-size:13.5px;color:var(--mut);margin-bottom:10px}.where div{margin:3px 0}
+.pane{display:grid;grid-template-columns:minmax(220px,.8fr) 1.5fr;gap:12px}@media(max-width:760px){.pane{grid-template-columns:1fr}}
+.code{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:8px 0;font:12.5px/1.7 ui-monospace,Menlo,monospace;align-self:start}.code .ln{padding:0 10px;white-space:pre;border-left:3px solid transparent}.code .ln.on{background:color-mix(in srgb,var(--ac) 20%,transparent);border-color:var(--ac);font-weight:700}
+.vis{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:12px;min-height:200px;overflow:auto}.msg{margin:8px 0 0;font-size:14.5px;min-height:44px}
+.bars{display:flex;gap:8px;align-items:flex-end;height:180px}.bw{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:12px}.bw .b{width:100%;background:#b3a9b8;border-radius:5px 5px 0 0;transition:.25s}.bw i{color:var(--mut);font-style:normal;font-size:10px}
+.b.min{background:#FFD700!important}.b.cur{background:var(--ac)!important}.b.done{background:var(--ok)!important}.b.swap{background:var(--ac2)!important}
+.leg{font-size:12px;color:var(--mut);margin-top:8px}
+.kv{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.kv div{border:1px solid var(--bd);border-radius:8px;padding:2px 8px;background:var(--card);font-size:12.5px}.kv div.hl{background:var(--ac);color:#fff}.kv span{margin-left:6px;color:var(--mut)}.kv div.hl span{color:#fff}
+.tk.big{font-size:20px;padding:6px 14px;min-width:44px}.tk.done{background:var(--ok);color:#fff}
+.ufrow{display:flex;flex-wrap:wrap}.un.cur{outline:3px solid var(--fg)}
+.cmp{display:grid;gap:8px}.cmp div{height:26px;border-radius:6px;color:#fff;font-size:12.5px;padding:3px 10px;white-space:nowrap}
+.pane{grid-template-columns:minmax(260px,1.25fr) 1.3fr}.code{overflow:auto;font-size:12px}.tks.rk{flex-wrap:nowrap;gap:4px;overflow:visible}.rk .tk{width:28px;min-width:0;justify-content:center;padding:2px 0;flex:none}
+.pane{grid-template-columns:minmax(330px,1.15fr) 1fr}@media(max-width:900px){.pane{grid-template-columns:1fr}}
+.code{background:#36454F;color:#e7e1ea;border:1px solid #59646b;border-radius:12px;padding:0 0 8px;font:12.5px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden}
+.chd{display:flex;justify-content:space-between;gap:8px;padding:8px 12px;background:#36454F;color:#b3a9b8;font:600 11.5px system-ui,sans-serif;margin-bottom:6px}
+.code .ln{display:grid;grid-template-columns:2.6em 1fr;padding:0 10px 0 0;white-space:normal;border-left:3px solid transparent;color:#e7e1ea}
+.code .ln b{color:#825F87;text-align:right;padding-right:10px;font-weight:400;user-select:none}
+.code .ln code{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;tab-size:2;background:none;padding:0}
+.code .ln.on{background:rgba(130,95,135,.22);border-left-color:#FFD700}.code .ln.on b{color:#FFD700}
+.code i{font-style:normal;width:auto;display:inline;color:inherit}.code .k{color:#FFD700}.code .s{color:#e7e1ea}.code .c{color:#b3a9b8;font-style:italic}.code .n{color:#FFD700}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.tabs button{display:flex;gap:7px;align-items:center;padding:6px 14px;border-radius:20px}.tabs b{background:var(--bd);color:var(--fg);border-radius:50%;width:21px;height:21px;display:inline-grid;place-items:center;font-size:11.5px}.tabs button.on{background:var(--ac);color:#fff;border-color:var(--ac)}.tabs button.on b{background:rgba(255,255,255,.3);color:#fff}
+.what{font-size:16px;line-height:1.55;margin:2px 0 12px!important;color:var(--fg)!important}
+.code .cl{display:grid;grid-template-columns:2.6em 1fr;padding:0 10px 0 0;border-left:3px solid transparent;color:#e7e1ea}.code .cl b{color:#b3a9b8;text-align:right;padding-right:10px;font-weight:400;user-select:none}
+.code .cl code{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;tab-size:2;background:none;padding:0}.code .cl.on{background:rgba(130,95,135,.24);border-left-color:#FFD700}.code .cl.on b{color:#FFD700}
+.pane{gap:16px;align-items:start}.vis{padding:16px}.msg{font-size:16px;line-height:1.55;min-height:52px;margin:12px 0 0}
+.kv div{font-size:14px;padding:4px 11px}.tks{gap:6px}.vis b{display:block;margin:10px 0 2px;font-size:13px;color:var(--mut);font-weight:600}.vis .leg{margin-top:10px;font-size:12.5px}
+.ctl button{padding:7px 14px}.ctl{gap:10px}
+@media(max-width:900px){.code{order:2}.pane{grid-template-columns:1fr}}
+.code .sk{color:#FFD700}.code .ss{color:#e7e1ea}.code .sc{color:#b3a9b8;font-style:italic}.code .sn{color:#FFD700}
+
+.pv{position:sticky;top:0;z-index:20;background:var(--bg);padding:8px 0;border-bottom:1px solid var(--bd);margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pv span{color:var(--mut);font-size:12.5px;margin-right:4px}.pv a{padding:5px 14px;border-radius:20px;border:1px solid var(--bd);color:var(--mut);text-decoration:none;background:var(--card);cursor:pointer}.pv a.on{color:#fff;background:var(--ac);border-color:var(--ac)}
+.view[hidden]{display:none}.vis .tk,.vis .kv div,.vis .un,.vis td,.vis .cmp div,.vis .tks,.code .cl{transition:background .4s,border-color .4s,color .4s,transform .4s,padding-left .6s ease,width .6s ease,outline-color .4s}
+.vis .new{animation:pop .45s ease}@keyframes pop{from{opacity:0;transform:scale(.6) translateY(8px)}to{opacity:1;transform:none}}
+.vis .pulse{animation:flash .6s ease}@keyframes flash{0%{transform:scale(1.35);color:var(--ac2)}100%{transform:none}}
+.vis .tk.w,.vis .tk.min,.vis .tk.in,.vis .tk.out{transform:translateY(-4px)}
+#over tr:not(.on):not(:first-child){display:none}
+@media(prefers-reduced-motion:reduce){.vis *,.code *{transition:none!important;animation:none!important}}
+.pipe{display:grid;gap:22px;margin:14px 0}.stage{position:relative;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px 16px}
+.stage:not(:last-child)::after{content:"↓";position:absolute;left:50%;bottom:-21px;color:var(--ac);font-size:18px}
+.stage p{margin:4px 0;color:var(--mut)}.stage em{display:block;font-style:normal;color:var(--ac);margin:4px 0 8px;font-weight:600}
+.how2 .ctl button{border-radius:999px;padding:7px 16px;font-weight:600}.how2 .ctl #pl{background:var(--ac);color:#fff;border-color:var(--ac)}
+.how2 select{appearance:none;-webkit-appearance:none;border:1px solid var(--bd);border-radius:999px;padding:6px 30px 6px 14px;color:var(--fg);font:inherit;cursor:pointer;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236a6f8a' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 12px center}
+.how2 input[type=text],.how2 input:not([type]),.how2 input[type=number]{font:13px ui-monospace,Menlo,Consolas,monospace;background:var(--bg);color:var(--fg);border:1px dashed var(--ac);border-radius:10px;padding:7px 10px}
+.how2 input:focus-visible,.how2 select:focus-visible{outline:2px solid var(--ac);outline-offset:2px}.how2 input[type=checkbox]{accent-color:var(--ac)}
+#extra:not(:empty){background:color-mix(in srgb,var(--ac) 7%,var(--card));border:1px solid var(--bd);border-radius:12px;padding:10px 14px;margin:10px 0}
+#extra:not(:empty)::before{content:"Try your own";font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ac)}
+.ring svg:not(.go) .nd{transform:translate(200px,115px) scale(.15)!important;opacity:0}
+.ring svg .nd{transition:transform .9s cubic-bezier(.2,.8,.2,1),opacity .5s;cursor:grab;touch-action:none}.ring svg.drag .nd{transition:none;cursor:grabbing}
+.ring svg .edge{stroke-dasharray:600;stroke-dashoffset:600;transition:stroke-dashoffset .8s ease .8s,opacity .2s}.ring svg.go .edge{stroke-dashoffset:0}
+.ring svg .lb{opacity:0;transition:opacity .5s 1.5s}.ring svg.go .lb{opacity:1}.ring svg .dim{opacity:.12!important}
+.master{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 4px}.master button{border-radius:999px;font-weight:700}
+.master #pa{background:var(--ac);color:#fff;border-color:var(--ac);padding:10px 22px;font-size:15px}.mbar{flex:1;min-width:140px;height:8px;border-radius:4px;background:var(--bd);overflow:hidden}
+.mbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .4s}#mtx{color:var(--mut);font-size:13px;min-width:190px}
+.why{background:color-mix(in srgb,var(--ac2) 9%,var(--card));border-left:4px solid var(--ac2);padding:8px 12px;border-radius:8px;margin:8px 0;font-size:14.5px}
+.pv .nplay{border-radius:999px;font-weight:700;background:var(--ac);color:#fff;border-color:var(--ac);padding:5px 18px}.pv .nplay:hover:not(:disabled){color:#fff;filter:brightness(1.12)}
+.how2 .srcbar{margin:10px 0 0;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--ac) 10%,var(--card));border:1px solid var(--bd);color:var(--fg);font-size:13.5px}.srcbar button{padding:2px 10px;margin-left:6px;font-size:12.5px}
+.tabs button.done{border-color:var(--ok)}.tabs button.done b{background:var(--ok);color:#fff}
+.tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}.tabs button{flex:none;white-space:nowrap}
+.more{margin-top:16px;padding-top:12px;border-top:1px solid var(--bd)}.more h3{margin:0 0 8px;font-size:14px;color:var(--mut)}
+.ring{position:relative;overflow:hidden}.ring .stage{position:relative;transform:scale(1.4);transition:transform 2s cubic-bezier(.2,.8,.2,1)}.ring .stage.go{transform:none}
+.ring .stage canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.ring .stage svg{position:relative;z-index:1}
+@media(prefers-reduced-motion:reduce){.ring .stage{transform:none;transition:none}}
+.ring svg .edge{stroke:transparent!important;stroke-width:12px!important}
+.ring{background:linear-gradient(165deg,#36454F,#36454F)!important;border-color:#59646b}.ring h4{color:#e7e1ea}.ring .nd rect{fill:#36454F}.ring svg .nd text{fill:#e7e1ea}
+</style><link rel="stylesheet" href="style.css"><style id="integrated-lab-theme">:root{--bg:var(--paper);--fg:var(--ink);--mut:var(--muted);--card:rgba(231,225,234,.76);--bd:var(--rule);--ac:#825F87;--ac2:#825F87;--bad:#36454F;--warn:#36454F;--ok:#825F87;--hit:#d3c6dc;--mv:#e4dbea;--board:var(--dark);--boardfg:var(--white);--rgb:130,95,135;color-scheme:light}
+body{max-width:none;width:100%;margin:0;padding:0 0 42px;background-color:var(--paper);background-image:var(--noise);color:var(--ink);font:15px/1.55 Georgia,"Times New Roman",serif}h1{margin:8px 0;color:var(--ink);font:500 40px/1.1 Georgia,"Times New Roman",serif;letter-spacing:-.04em;background:none;-webkit-text-fill-color:currentColor}button{border-radius:2px;color:var(--ink);background:rgba(231,225,234,.7);border-color:#b3a9b8;font:11px Arial,sans-serif;letter-spacing:.05em}button:hover:not(:disabled){color:var(--accent);border-color:var(--accent)}
+.lab-site-head{width:min(1220px,calc(100% - 48px));height:auto;min-height:74px;margin:0 auto 18px;padding:8px 0;gap:12px;flex-wrap:wrap}.lab-site-head nav{margin-left:auto;gap:18px}.lab-site-head nav a{padding:8px 0;border:0;border-radius:0;background:none;color:var(--muted);font:10px Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase}.lab-site-head nav a.on{color:var(--accent);background:none;border-color:transparent;border-bottom:1px solid var(--accent)}.view{width:min(1220px,calc(100% - 48px));max-width:none;margin:0 auto}.view#v1{display:none!important}.view#v3>header{padding:12px 0 17px;border-bottom:1px solid var(--rule)}.view#v3>header h1{font-size:clamp(38px,5vw,58px)}.view#v3 .sub{color:var(--muted);font:16px/1.5 Georgia,serif}
+.master{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0 4px}.master button{border-radius:2px;padding:10px 15px}.master #pa{background:var(--ink);border-color:var(--ink);color:var(--paper-light);font-weight:700}.master #pn{background:transparent}.master .mbar{flex:1;min-width:110px;height:5px;border-radius:0;background:rgba(54,69,79,.12)}.master .mbar i{background:var(--accent)}#mtx{min-width:190px;color:var(--muted);font:11px Arial,sans-serif}.card{margin:14px 0;padding:17px;border:1px solid rgba(54,69,79,.48);border-radius:2px;background-color:rgba(231,225,234,.64);background-image:var(--noise);color:var(--ink)}.card>h3{font:500 21px Georgia,serif}.tabs{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.tabs button{display:flex;align-items:center;gap:7px;border-radius:2px;padding:8px 11px;background:rgba(231,225,234,.55);white-space:nowrap}.tabs button b{background:transparent;color:var(--muted);border:1px solid var(--rule)}.tabs button.on{background:var(--ink);border-color:var(--ink);color:var(--paper-light)}.tabs button.on b{background:transparent;color:var(--paper-light);border-color:rgba(231,225,234,.35)}.tabs button.done{border-color:var(--accent)}.tabs button.done b{color:var(--accent)}
+#panel{padding:19px}.view#v3 #pt{margin:0 0 4px;font:500 27px Georgia,serif}.view#v3 .what{margin:2px 0 10px!important;color:var(--muted)!important;font:14px/1.5 Arial,sans-serif}.ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 14px;color:var(--muted);font:11px Arial,sans-serif}.ctl button{padding:8px 12px}.ctl select{padding:7px 9px;border:1px solid var(--rule);background:var(--paper-light);color:var(--ink)}.ctl input[type=range]{accent-color:var(--accent)}.pane{display:flex;flex-direction:column;gap:12px;align-items:stretch}.pane>.code{order:2;width:100%;align-self:stretch}.pane>div:not(.code){order:1;width:100%}.vis{min-height:230px;padding:18px;border:1px solid rgba(54,69,79,.38);border-radius:2px;background:rgba(231,225,234,.9);color:var(--ink)}.msg{min-height:0;margin:8px 2px 2px;color:var(--muted);font:13px/1.55 Arial,sans-serif}
+.code{width:100%;overflow:auto;border:1px solid rgba(54,69,79,.38);border-radius:2px;background:#36454F;color:#e7e1ea;font:12.5px/1.7 ui-monospace,Consolas,monospace}.chd{background:#36454F;color:#e7e1ea}.code .cl{color:#e7e1ea}.code .cl b{color:#b3a9b8}.code .cl.on{background:rgba(130,95,135,.2);border-left-color:#825F87}.code .cl.on b{color:#c7b9d0}.code .k,.code .sk{color:#d3c6dc}.code .s,.code .ss{color:#c7b9d0}.code .c,.code .sc{color:#b3a9b8}.code .n,.code .sn{color:#d3c6dc}.more{margin-top:14px;padding-top:12px;border-top:1px solid var(--rule)}.more h3{font:500 18px Georgia,serif}.where{color:var(--muted);font:12px/1.5 Arial,sans-serif}.why{background:rgba(130,95,135,.07);border-left:3px solid var(--accent);border-radius:0;color:var(--muted);font:12px/1.5 Arial,sans-serif}.over{font:11px Arial,sans-serif}.over th{color:var(--muted)}.over td{border-color:var(--rule)}.over code,.where code{background:rgba(54,69,79,.06);color:var(--ink)}.over tr.on td{background:rgba(130,95,135,.08)}.vis .leg{color:var(--muted)}.vis .tk{background:rgba(231,225,234,.9);border-color:var(--rule);color:var(--ink)}.vis .tk.done{background:var(--accent);color:#fff}.vis .kv div{background:rgba(231,225,234,.8);border-color:var(--rule)}.vis .kv div.hl{background:var(--accent);color:#fff}.vis .un{color:var(--ink);border-radius:2px}.vis .un.cur{outline-color:var(--accent)}.vis .cmp div{border-radius:2px}.vis .dp td.eq{background:var(--hit)}.vis .dp td.computed{background:rgba(54,69,79,.06)}.vis .dp td.pth{outline-color:var(--accent)}.vis .ring .stage{background:rgba(231,225,234,.65)}.vis .ring{background:rgba(231,225,234,.5)!important;border-color:var(--rule)}.vis .ring h4{color:var(--ink)}.vis .ring .nd rect{fill:var(--paper-light)}.vis .ring svg .nd text{fill:var(--ink)}.view#v3 .tabs{overflow-x:auto;flex-wrap:nowrap;padding-bottom:8px}.view#v3 .tabs button{flex:none}
+@media(max-width:850px){.lab-site-head,.view{width:calc(100% - 36px)}.lab-site-head nav{margin-left:auto}.view#v3>header h1{font-size:42px}}
+@media(max-width:620px){.lab-site-head,.view{width:calc(100% - 26px)}.lab-site-head{gap:8px}.lab-site-head nav{order:3;width:100%;margin:0;justify-content:space-between}.view#v3>header h1{font-size:36px}.master .mbar{order:4;flex-basis:100%}#mtx{min-width:0}.card{padding:13px}.ctl{gap:6px}.vis{padding:10px;overflow:auto}}
+
+.view#v3>header{padding:4px 0 8px!important;margin-bottom:0}
+.view#v3>header h1{margin:0;font-size:clamp(30px,3vw,38px)!important;line-height:1.1}
+.view#v3 .sub{margin:3px 0!important;font-size:13px!important;line-height:1.35}
+.view#v3 .lab-source-status{margin:2px 0;color:var(--muted);font-size:10px}
+.view#v3 .master{gap:7px;margin:7px 0 0}
+.view#v3 .master button{padding:7px 11px}
+.view#v3 .master #mtx{min-width:0;font-size:10px}
+.view#v3 .lab-workspace{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.view#v3 .concept-list{position:static;width:100%;margin:0;padding:8px 10px}
+.view#v3 .concept-list h3{margin:0 0 6px;font:600 11px Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.view#v3 .tabs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:0;padding:0;overflow:visible}
+.view#v3 .tabs button{display:flex;min-width:0;justify-content:flex-start;gap:5px;padding:5px 6px;white-space:normal;font-size:10px;line-height:1.15}
+.view#v3 .tabs button b{display:grid;flex:none;place-items:center;width:17px;height:17px;padding:0;font-size:9px}
+.view#v3 #panel{min-width:0;margin:0;padding:12px}
+.view#v3 #pt{font-size:22px!important}
+.view#v3 .ctl{gap:5px;margin:7px 0 9px;font-size:10px}
+.view#v3 .ctl button{padding:6px 9px}
+.view#v3 .vis{min-height:270px;padding:12px}
+.view#v3 .msg{margin-top:5px;font-size:12px;line-height:1.4}
+.view#v3 .pane{gap:8px}
+.view#v3 .code{font-size:11px;line-height:1.5}
+.view#v3 .more{margin-top:9px;padding-top:8px}
+.view#v3 .lab-reference{margin-top:12px;padding:12px}
+@media(max-width:900px){.view#v3 .tabs{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:620px){.view#v3 .tabs{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:480px){.view#v3 .lab-workspace{gap:6px}.view#v3 .concept-list{padding:7px}.view#v3 .tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.view#v3 #panel{padding:9px}.view#v3 .vis{min-height:245px;padding:9px}}
+
+/* Lab content grows with the page; no nested scroll frames or zoom jumps. */
+.view#v3 .tabs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));overflow:visible;gap:4px;padding-bottom:0}
+.view#v3 .tabs button{min-width:0;white-space:normal}
+.view#v3 .vis{min-height:340px;height:auto;max-height:none;overflow:visible}
+.view#v3 .code{width:100%;height:auto;max-height:none;overflow:visible}
+.view#v3 .code .cl{white-space:normal;overflow-wrap:anywhere}
+.view#v3 .code .cl code{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+.view#v3 pre{max-height:none;overflow:visible;white-space:pre-wrap;overflow-wrap:anywhere}
+.view#v3 .vis svg,.view#v3 .vis canvas{max-width:100%}
+.view#v3 .hash-lanes{overflow:visible;min-width:0}
+.view#v3 .hash-lane{flex-wrap:wrap;white-space:normal;overflow-wrap:anywhere}
+.view#v3 .ring{overflow:visible}
+.view#v3 .ring .stage{transform:none!important;transition:none!important;overflow:visible}
+.view#v3 .ring .stage canvas{display:none}
+.view#v3 .ring .stage svg{max-width:100%;height:auto}
+.view#v3 .lab-table-wrap{max-width:100%;overflow:visible}
+.view#v3 .over{width:100%;table-layout:fixed}
+.view#v3 .over td,.view#v3 .over th{overflow-wrap:anywhere}
+.view#v3 .lab-source-status{margin:8px 0 0;color:var(--muted);font:11px/1.5 Arial,sans-serif}
+@media(max-width:620px){.view#v3 .vis{min-height:300px;overflow:visible}.view#v3 .pane>.code{min-width:0}}
+</style><style id="algorithm-cover-style">
+.lab-cover{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);align-items:center;gap:clamp(28px,6vw,84px);min-height:570px;margin:0 auto 42px;padding:48px 0;border-bottom:1px solid var(--rule)}
+.lab-cover-copy{min-width:0}.lab-cover-kicker{margin:0 0 34px;color:var(--muted);font:10px/1.5 "DM Sans",Arial,sans-serif;letter-spacing:.19em;text-transform:uppercase}.lab-cover h1{max-width:8ch;margin:0;color:var(--ink);font:700 clamp(58px,8vw,112px)/.86 "Space Grotesk","DM Sans",Arial,sans-serif;letter-spacing:-.065em}.lab-cover h1 span{color:var(--accent)}.lab-cover-copy>p:not(.lab-cover-kicker){max-width:37ch;margin:24px 0;color:var(--ink);font:17px/1.55 Georgia,"Times New Roman",serif}
+.lab-cover-link{display:inline-flex;align-items:center;gap:24px;padding:9px 0;border-bottom:1px solid var(--ink);color:var(--ink);font:600 10px "DM Sans",Arial,sans-serif;letter-spacing:.12em;text-decoration:none;text-transform:uppercase}.lab-cover-link:hover{color:var(--accent);border-color:var(--accent)}.lab-cover-link span{color:var(--accent);font-size:18px}
+.lab-cover .algorithm-console{position:relative;min-width:0;min-height:360px;overflow:hidden;border:1px solid rgba(231,225,234,.22);background-color:#36454F;background-image:linear-gradient(rgba(231,225,234,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(231,225,234,.025) 1px,transparent 1px),var(--noise);background-size:24px 24px,24px 24px,180px 180px;box-shadow:0 18px 42px rgba(54,69,79,.14);color:#e7e1ea}.lab-cover .algorithm-console:after{position:absolute;inset:0;content:"";pointer-events:none;background:repeating-linear-gradient(to bottom,transparent 0 5px,rgba(0,0,0,.075) 6px);opacity:.28}
+.algo-console-top{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid rgba(231,225,234,.17);color:#b3a9b8;font:9px "DM Sans",Arial,sans-serif;letter-spacing:.13em;text-transform:uppercase}.algo-live{display:flex;align-items:center;gap:7px;color:#FFD700}.algo-live i{width:6px;height:6px;border-radius:50%;background:#FFD700;box-shadow:0 0 10px #FFD700;animation:algoPulse 1.6s ease-in-out infinite}
+.algo-stream{position:relative;z-index:1;display:grid;align-content:center;gap:8px;min-height:272px;padding:28px clamp(14px,3vw,32px);font:clamp(12px,1.3vw,16px)/1.6 "JetBrains Mono",Consolas,monospace}.algo-line{display:grid;grid-template-columns:30px minmax(0,1fr);gap:14px;min-height:26px;align-items:center;color:#b3a9b8;transition:color .25s,transform .25s,text-shadow .25s}.algo-line i{color:#697164;font:10px "JetBrains Mono",monospace;font-style:normal}.algo-line code{min-height:1.5em;white-space:pre-wrap;overflow-wrap:anywhere}.algo-line.done{color:#d2d7c8}.algo-line.active{color:#e7e1ea;transform:translateX(4px);text-shadow:0 0 16px rgba(130,95,135,.5)}.algo-line.active i{color:#c7b9d0}.algo-line.active code:after{display:inline-block;width:8px;height:1em;margin-left:3px;content:"";vertical-align:-2px;background:#c7b9d0;animation:caretBlink .8s steps(2,start) infinite}
+.algo-stages{position:relative;z-index:1;display:flex;justify-content:space-between;gap:10px;padding:13px 16px;border-top:1px solid rgba(231,225,234,.17);color:#b3a9b8;font:8px "DM Sans",Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase}.algo-stages b{color:#FFD700;font-weight:600}@keyframes caretBlink{to{visibility:hidden}}@keyframes algoPulse{50%{opacity:.45;box-shadow:0 0 2px #FFD700}}
+@media(max-width:850px){.lab-cover{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);min-height:500px;gap:24px}.lab-cover h1{font-size:clamp(56px,8vw,80px)}.lab-cover .algorithm-console{min-height:330px}.algo-stream{min-height:245px}}
+@media(max-width:680px){.lab-cover{grid-template-columns:1fr;gap:28px;min-height:0;padding:34px 0 30px;margin-bottom:30px}.lab-cover-kicker{margin-bottom:23px}.lab-cover h1{max-width:10ch;font-size:clamp(54px,12vw,82px)}.lab-cover-copy>p:not(.lab-cover-kicker){font-size:15px;margin:17px 0}.lab-cover .algorithm-console{min-height:300px}.algo-stream{min-height:218px;padding:20px 14px;font-size:12px}.algo-stages{font-size:7px;gap:5px}}
+@media(prefers-reduced-motion:reduce){.algo-live i,.algo-line.active code:after{animation:none}.algo-line.active code:after{visibility:hidden}}
+</style><style id=" restrained-gold">
+:root{--ac:#825F87;--warn:#36454F}
+.lab-site-head nav a.on{border:0!important;border-bottom:0!important;color:#825F87!important}
+.lab-cover-link{border:0!important;text-decoration:none!important}
+.card,.stage,.lab-cover .algorithm-console,.vis,.code{border-color:rgba(54,69,79,.42)!important}
+.warning-icon{color:#36454F!important}
+#v3 .code .cl.on{background:transparent!important;border-left-color:transparent!important}
+#v3 .code .sk,#v3 .code .ss,#v3 .code .sc,#v3 .code .sn,#v3 .code .k,#v3 .code .s,#v3 .code .c,#v3 .code .n{color:#e7e1ea!important}
+#v3 .code .cl.on b{color:#b3a9b8!important}
+#v3 .code .cl code .code-focus{color:#FFD700!important;background:none!important;font-weight:700;text-shadow:0 0 9px rgba(255,215,0,.22)}
+#v3 #pa,#v3 #pl{background:#FFD700!important;color:#36454F!important;border:1px solid #36454F!important;border-radius:999px!important;box-shadow:0 5px 14px rgba(255,215,0,.2);font-weight:700}
+#v3 #pa:hover,#v3 #pl:hover{box-shadow:0 7px 19px rgba(255,215,0,.34);transform:translateY(-1px)}
+#v3 #pa:focus-visible,#v3 #pl:focus-visible{outline:2px solid #36454F;outline-offset:3px}
+</style></head><body>
+<header class="site-head lab-site-head"><a class="brand" href="index.html" aria-label="CopyCatch home">CopyCatch</a><nav aria-label="Main navigation"><a href="index.html">Detector</a><a class="on" href="how.html">Explore algorithms</a></nav></header>
+<section class="view lab-cover" aria-labelledby="labCoverTitle"><div class="lab-cover-copy"><h1 id="labCoverTitle">From source code to <span>evidence.</span></h1><p>Follow a code fragment as it becomes a fingerprint, a relationship, and a match a teacher can review.</p><a class="lab-cover-link" href="#v3">Explore the mechanism <span aria-hidden="true">?</span></a></div><figure class="algorithm-console" aria-label="Live animation of CopyCatch analysis code being formed"><figcaption class="algo-console-top"><span>CopyCatch / analysis pipeline</span><span class="algo-live"><i></i>Running</span></figcaption><div class="algo-stream" id="algoStream" aria-hidden="true"><div class="algo-line"><i>01</i><code data-code="const tokens = tokenize(file.text);"></code></div><div class="algo-line"><i>02</i><code data-code="const grams = kgramHashes(tokens.ids);"></code></div><div class="algo-line"><i>03</i><code data-code="const fingerprints = winnow(grams);"></code></div><div class="algo-line"><i>04</i><code data-code="index.get(hash).push(fileIndex);"></code></div><div class="algo-line"><i>05</i><code data-code="unionFind.union(pair.a, pair.b);"></code></div></div><div class="algo-stages" id="algoStages"><b>Source</b><span>Tokens</span><span>Fingerprints</span><span>Index</span><b>Evidence</b></div></figure></section>
+
+<div class="view" id="v1" hidden>
+<header>
+  <h1>CopyCatch</h1>
+  <p class="sub">Add code files to inspect their similarity and matching lines.</p>
+  
+</header>
+
+
+
+<label class="drop" id="drop">
+  <input type="file" id="files" multiple hidden>
+  <b>Drop code files here</b><span>or click to browse (.js .py .java .c .cpp .txt ...)</span>
+</label>
+<div class="bar">
+  <button id="sample">Try the sample batch</button>
+  <button id="demo">▶ Guided demo</button>
+  <button id="stress">Stress test (300 files)</button>
+  <button id="csv" disabled>Download report (CSV)</button>
+  <label class="range">Flag files that are at least <b id="thv">50</b>% similar
+    <input type="range" id="th" min="10" max="100" value="50"></label>
+</div>
+
+<div id="banner" class="banner" hidden></div>
+<div class="steps" id="steps"></div>
+
+<div class="two">
+  <section class="card">
+    <h3>Copying rings</h3>
+    <p class="legend">A ring is a group of files that share code. Each box is a file. A line joins two files, and its label says how similar they are: <b style="color:var(--bad)">red</b> very likely copied, <b style="color:var(--warn)">amber</b> suspicious, <b style="color:var(--ok)">green</b> some overlap. Drag any box to move it, hover a box to focus its links, click a line or a % to compare.</p>
+    <div id="graph" class="rings"></div>
+    <div id="clean" class="clean"></div>
+  </section>
+  <div>
+    <section class="card"><h3>Matching pairs</h3><div id="pairs"><span class="empty">Load files to begin.</span></div></section>
+    <section class="card"><h3>Most suspicious files</h3><div id="board"></div></section>
+  </div>
+</div>
+
+<section class="card" id="heatcard" hidden>
+  <h3>Everyone against everyone</h3>
+  <p class="legend">Darker means more similar. Dark squares along the diagonal are copying rings. Click a cell to compare.</p>
+  <div id="heat" class="heat"></div>
+</section>
+
+<section class="card" id="diffcard" hidden>
+  <h3 id="difftitle"></h3>
+  <p class="legend"><i class="k hit"></i>Same line, same order <i class="k mv"></i>Shared code that was moved or reordered</p>
+  <div class="diff"><pre id="da"></pre><pre id="db"></pre></div>
+</section>
+</div>
+<div class="view how2" id="v3">
+<header><h1>Algorithm lab</h1>
+
+<p id="labSourceStatus" class="lab-source-status" aria-live="polite"></p>
+<div class="master"><button id="pa">▶ Play all 13 methods</button><button id="pn" title="Skip to the next method">Skip ⏭</button><div class="mbar"><i id="mbi"></i></div><span id="mtx">Not started</span></div></header>
+<div class="lab-workspace"><section class="card concept-list"><h3>13 methods</h3><div class="tabs" id="tabs"></div></section>
+<section class="card" id="panel" hidden>
+  <h2 id="pt"></h2><p class="what" id="pwhat"></p>
+<div class="ctl"><button id="rs">Reset</button><button id="pv">Back</button><button id="nx">Next</button><button id="pl">Play</button>
+    Speed <select id="sp"><option value="1300">Slow</option><option value="750" selected>Normal</option><option value="300">Fast</option></select>
+    <input type="range" id="sl" min="0" max="0" value="0"><span id="cnt"></span></div>
+  <div class="pane"><div class="code" id="code"></div><div><div id="vis" class="vis"></div><p id="msg" class="msg"></p></div></div>
+  <div class="more"><h3>More about this method</h3><div class="ctl" id="extra"></div><p class="why" id="pwhy"></p><div id="pw" class="where"></div><p class="srcbar" id="src"></p></div>
+</section></div>
+<section class="card lab-reference"><h3>Where this lives in CopyCatch</h3><div class="lab-table-wrap"><table class="over" id="over"></table></div></section>
+</div>
+<script>(function(){
+/* CopyCatch: finds copied code across a batch of files.
+   normalise -> tokens -> Rabin-Karp k-grams -> winnowing fingerprints -> inverted index
+   -> pair scores -> union-find groups -> LCS (DP) line alignment -> force-directed graph */
+
+const K = 5, W = 4;
+const MOD = 1000000007, BASE = 131;
+const KEYWORDS = new Set(("if else elif for while return function def class const let var int void float double char " +
+  "print import from in of new true false null None True False and or not try catch except break continue " +
+  "public private static this self").split(" "));
+const vocab = new Map();
+const $ = id => document.getElementById(id);
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let files = [], analysis = null, SRC = "";
+
+/* 1. Normalise: comments dropped, identifiers -> V, numbers -> N, strings -> S.
+   Also records each token's line and a per-line signature (used later by LCS). */
+function tokenize(text) {
+  const re = /\/\/.*|\/\*[\s\S]*?\*\/|#(?!\s*(?:include|define|ifn?def|endif|pragma|undef)\b).*|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\d+\.?\d*|[A-Za-z_]\w*|\S/g;
+  const ids = [], lines = [], sig = [], raw = [], norm = [];
+  let m, line = 1, last = 0;
+  while ((m = re.exec(text))) {
+    line += (text.slice(last, m.index).match(/\n/g) || []).length;
+    last = m.index;
+    let t = m[0];
+    if (t.startsWith("//") || t.startsWith("/*") || (t[0] === "#" && t.length > 1)) continue;
+    if (t[0] === '"' || t[0] === "'") t = "S";
+    else if (/^\d/.test(t)) t = "N";
+    else if (/^[A-Za-z_]/.test(t) && !KEYWORDS.has(t)) t = "V";
+    let id = vocab.get(t);
+    if (!id) { id = vocab.size + 1; vocab.set(t, id); }
+    ids.push(id); lines.push(line); raw.push(m[0]); norm.push(t);
+    (sig[line] = sig[line] || []).push(id);
+  }
+  // rows = lines with >= 2 tokens (a lone "}" would match everywhere and add noise)
+  const rows = sig.map((a, n) => a.length >= 2 ? { n, s: a.join(",") } : null).filter(Boolean);
+  return { ids, lines, rows, raw, norm };
+}
+
+/* 2. Rabin-Karp rolling hash over every window of K tokens: O(n). */
+function kgramHashes(ids) {
+  const out = [];
+  if (ids.length < K) return out;
+  let pow = 1;
+  for (let i = 0; i < K - 1; i++) pow = (pow * BASE) % MOD;
+  let h = 0;
+  for (let i = 0; i < K; i++) h = (h * BASE + ids[i]) % MOD;
+  out.push(h);
+  for (let i = 1; i + K <= ids.length; i++) {
+    h = (((h - ids[i - 1] * pow) % MOD + MOD) % MOD * BASE + ids[i + K - 1]) % MOD;
+    out.push(h);
+  }
+  return out;
+}
+
+/* 3. Winnowing (as in MOSS): keep the smallest hash in each window of W.
+   Fix: files with fewer than W hashes still get a fingerprint. */
+function winnow(hashes) {
+  const fp = [], w = Math.min(W, hashes.length);
+  let lastPos = -1;
+  for (let i = 0; i + w <= hashes.length; i++) {
+    let min = i;
+    for (let j = i + 1; j < i + w; j++) if (hashes[j] <= hashes[min]) min = j;
+    if (min !== lastPos) { fp.push({ h: hashes[min], pos: min }); lastPos = min; }
+  }
+  return fp;
+}
+
+/* 4. Union-Find with path compression: merges students into copying rings. */
+class UnionFind {
+  constructor(n) { this.p = Array.from({ length: n }, (_, i) => i); }
+  find(x) { while (this.p[x] !== x) { this.p[x] = this.p[this.p[x]]; x = this.p[x]; } return x; }
+  union(a, b) { this.p[this.find(a)] = this.find(b); }
+}
+
+/* 5. LCS by dynamic programming on normalised lines: O(m*n) time, then backtrack
+   through the table to recover exactly which lines match, in order. */
+function lcsLines(A, B) {
+  const m = A.length, n = B.length, w = n + 1;
+  const res = { a: new Set(), b: new Set(), len: 0 };
+  if (!m || !n || m * n > 9e6) return res;
+  const dp = new Uint16Array((m + 1) * w);
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i * w + j] = A[i - 1].s === B[j - 1].s ? dp[(i - 1) * w + j - 1] + 1
+                    : Math.max(dp[(i - 1) * w + j], dp[i * w + j - 1]);
+  let i = m, j = n;
+  while (i && j) {
+    if (A[i - 1].s === B[j - 1].s) { res.a.add(A[i - 1].n); res.b.add(B[j - 1].n); i--; j--; }
+    else if (dp[(i - 1) * w + j] >= dp[i * w + j - 1]) i--; else j--;
+  }
+  res.len = dp[m * w + n];
+  return res;
+}
+
+
+(function(){
+function analyze() {
+  const t0 = performance.now();
+  const data = files.map(f => {
+    const tk = tokenize(f.text);
+    const fp = winnow(kgramHashes(tk.ids));
+    const byHash = new Map();
+    fp.forEach(({ h, pos }) => { if (!byHash.has(h)) byHash.set(h, []); byHash.get(h).push(pos); });
+    return { name: f.name, text: f.text, lines: tk.lines, rows: tk.rows, byHash, ntok: tk.ids.length, nlines: f.text.split("\n").length };
+  });
+  // Inverted index: hash -> files containing it. Only files sharing a hash are compared.
+  const index = new Map();
+  data.forEach((d, i) => d.byHash.forEach((_, h) => {
+    if (!index.has(h)) index.set(h, []);
+    index.get(h).push(i);
+  }));
+  const shared = new Map();
+  index.forEach(list => {
+    // skip boilerplate seen in most files, otherwise one common snippet makes this O(n^2)
+    if (list.length > Math.max(5, data.length * 0.5)) return;
+    for (let x = 0; x < list.length; x++)
+      for (let y = x + 1; y < list.length; y++) {
+        const key = list[x] * data.length + list[y];
+        shared.set(key, (shared.get(key) || 0) + 1);
+      }
+  });
+  const pairs = [...shared].map(([key, s]) => {
+    const a = Math.floor(key / data.length), b = key % data.length;
+    return { a, b, shared: s, sim: Math.min(1, s / Math.min(data[a].byHash.size, data[b].byHash.size)) };
+  }).sort((x, y) => y.sim - x.sim);
+  const tIndex = performance.now() - t0;
+
+  const t1 = performance.now();
+  let naiveChecks = 0;
+  for (let a = 0; a < data.length; a++)
+    for (let b = a + 1; b < data.length; b++) {
+      naiveChecks++;
+      for (const h of data[a].byHash.keys()) data[b].byHash.has(h);
+    }
+  const simMap = new Map(pairs.map(p => [p.a * data.length + p.b, p.sim]));
+  analysis = { data, pairs, simMap, tIndex, tNaive: performance.now() - t1, naiveChecks, focus: null };
+  if (window.labRefresh) window.labRefresh();
+  $("diffcard").hidden = true;
+  render();
+}
+
+const COLORS = ["#FFD700", "#825F87", "#825F87", "#FFD700", "#825F87", "#825F87", "#825F87"];
+const verdict = s => s >= .8 ? ["Very likely copied", "hi"] : s >= .5 ? ["Suspicious", "mid"] : ["Some overlap", "lo"];
+const sim = (a, b) => analysis.simMap.get(Math.min(a, b) * analysis.data.length + Math.max(a, b)) || 0;
+const badge = s => { const [t, c] = verdict(s); return `<span class="badge ${c}">${t}</span>`; };
+
+function updateCoverPipeline(data,pairs,flagged,groups,threshold){
+  const preview=(values,format)=>`[${values.slice(0,4).map(format).join(", ")}${values.length>4?`, ...+${values.length-4}`:""}]`;
+  const top=flagged[0]||pairs[0],first=data[0],sampleTokens=tokenize(first.text).ids,tokenPreview=sampleTokens.slice(0,6).map(t=>JSON.stringify(t)).join(", "),hashPreview=[...first.byHash.keys()].slice(0,2).join(", ");
+  const final=flagged[0]?`unionFind.union(${JSON.stringify(data[top.a].name)}, ${JSON.stringify(data[top.b].name)}); // ${Math.round(top.sim*100)}% | ${groups.length} group${groups.length===1?"":"s"}`:top?`reviewPair(${JSON.stringify(data[top.a].name)}, ${JSON.stringify(data[top.b].name)}); // ${Math.round(top.sim*100)}% below ${threshold}% threshold`:data.length<2?"// Add a second file to compare fingerprints":"// No shared fingerprints in this batch";
+  window.copyCatchCoverLines=[`const files = ${preview(data,d=>JSON.stringify(d.name))}; // ${data.length} uploaded`,`const tk = tokenize(files[0].text); // ${JSON.stringify(first.name)}: ${first.ntok} tokens [${tokenPreview}${sampleTokens.length>6?", ...":""}]`,`const fp = winnow(kgramHashes(tk.ids)); // ${first.byHash.size} kept [${hashPreview}]`,`index.candidates = ${pairs.length}; // pairs sharing fingerprints`,final];
+  if(window.setCopyCatchCoverLines)window.setCopyCatchCoverLines(window.copyCatchCoverLines);
+}
+function render() {
+  if (!analysis) return;
+  const th = +$("th").value / 100, { data, pairs } = analysis;
+  $("thv").textContent = $("th").value;
+  const flagged = pairs.filter(p => p.sim >= th);
+  const uf = new UnionFind(data.length);
+  flagged.forEach(p => uf.union(p.a, p.b));
+  const groups = new Map();
+  flagged.forEach(p => [p.a, p.b].forEach(i => {
+    const r = uf.find(i);
+    if (!groups.has(r)) groups.set(r, new Set());
+    groups.get(r).add(i);
+  }));
+  const gList = [...groups.values()], gColor = new Map();
+  gList.forEach((g, gi) => g.forEach(i => gColor.set(i, COLORS[gi % COLORS.length])));
+  analysis.cur = { flagged, gColor, gList };
+  $("csv").disabled = !flagged.length;
+
+  const nFlag = gColor.size;
+  $("banner").hidden = false;
+  $("banner").className = "banner" + (nFlag ? "" : " ok");
+  $("banner").innerHTML = nFlag
+    ? `<b>${nFlag} of ${data.length} files</b> look copied, in <b>${gList.length} ring${gList.length > 1 ? "s" : ""}</b>. Strongest match: <b>${esc(data[flagged[0].a].name)}</b> and <b>${esc(data[flagged[0].b].name)}</b> (${Math.round(flagged[0].sim * 100)}%).`
+    : `No copying found at ${$("th").value}%. Try lowering the slider.`;
+
+  const tok = data.reduce((s, d) => s + d.ntok, 0), fps = data.reduce((s, d) => s + d.byHash.size, 0);
+  $("steps").innerHTML = [
+    ["1. Clean up", "Comments dropped, names and numbers made generic", tok.toLocaleString() + " tokens"],
+    ["2. Fingerprint", "Rolling hash and winnowing keep a few signatures per file", fps.toLocaleString() + " fingerprints"],
+    ["3. Look up", "A hash index only compares files that share a signature", `${pairs.length.toLocaleString()} of ${analysis.naiveChecks.toLocaleString()} pairs`],
+    ["4. Group", "Union-Find joins linked files into rings", gList.length + " rings"],
+    ["5. Prove it", "LCS lines up the matching lines. Press compare.", "per pair"]
+  ].map(([t, d, n]) => `<div><b>${t}</b><em>${n}</em><small>${d}</small></div>`).join("") +
+    `<p class="time" style="grid-column:1/-1">Index pipeline ${analysis.tIndex.toFixed(1)} ms. Brute-force comparison of every pair would take ${analysis.tNaive.toFixed(1)} ms more.</p>`;
+
+
+  $("pairs").innerHTML = flagged.slice(0, 12).map(p =>
+    `<div class="row"><span>${esc(data[p.a].name)} &harr; ${esc(data[p.b].name)} <b>${Math.round(p.sim * 100)}%</b>${badge(p.sim)}</span>` +
+    `<button onclick="showDiff(${p.a},${p.b})">compare</button><div class="bar2"><i style="width:${p.sim * 100}%"></i></div></div>`).join("")
+    || "<span class='empty'>Nothing above the threshold.</span>";
+
+  // leaderboard: each file's closest match
+  const best = new Map();
+  pairs.forEach(p => { [[p.a, p.b], [p.b, p.a]].forEach(([x, y]) => { if (!best.has(x) || best.get(x).sim < p.sim) best.set(x, { y, sim: p.sim }); }); });
+  $("board").innerHTML = [...best].sort((u, v) => v[1].sim - u[1].sim).slice(0, 6).map(([x, b]) =>
+    `<div class="row"><span>${esc(data[x].name)} <small class="empty">closest: ${esc(data[b.y].name)}</small></span><b>${Math.round(b.sim * 100)}%</b><div class="bar2"><i style="width:${b.sim * 100}%"></i></div></div>`).join("")
+    || "<span class='empty'>No matches yet.</span>";
+
+  drawRings();
+  drawHeat();
+  updateCoverPipeline(data,pairs,flagged,gList,+$("th").value);
+}
+
+/* Rings: one small, fixed-layout card per copying ring. Box = file, line = shared code, colour = how serious. */
+const sev = s => s >= .8 ? "#FFD700" : s >= .5 ? "#FFD700" : "#825F87";
+function drawRings() {
+  const { data } = analysis, { flagged, gList, gColor } = analysis.cur, states = [];
+  $("graph").innerHTML = gList.map((g, gi) => {
+    const ids = [...g].slice(0, 10), n = ids.length, set = new Set(ids), big = n > 6;
+    const edges = flagged.filter(p => set.has(p.a) && set.has(p.b));
+    const pos = new Map(ids.map((id, k) => { const a = (n === 2 ? 0 : -Math.PI / 2) + (n === 2 ? Math.PI : 2 * Math.PI) * k / n; return [id, [200 + 140 * Math.cos(a), 115 + 78 * Math.sin(a)]]; }));
+    states.push({ pos }); const pw = big ? 78 : 98, top = Math.max(...edges.map(p => p.sim));
+    const lines = edges.map(p => { const [x1, y1] = pos.get(p.a), [x2, y2] = pos.get(p.b);
+      return `<line class="edge" data-a="${p.a}" data-b="${p.b}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${sev(p.sim)}" stroke-width="${2 + p.sim * 5}" stroke-linecap="round" onclick="showDiff(${p.a},${p.b})"><title>Click to compare</title></line>`; }).join("");
+    const nodes = ids.map(id => { const [x, y] = pos.get(id);
+      return `<g class="nd" data-id="${id}" style="transform:translate(${x}px,${y}px)"><rect x="${-pw / 2}" y="-13" width="${pw}" height="26" rx="13" style="stroke:${COLORS[gi % COLORS.length]}"/><text x="0" y="4">${esc(data[id].name.slice(0, big ? 10 : 13))}</text></g>`; }).join("");
+    const labels = edges.filter(p => edges.length <= 10 || p.sim >= .8).map(p => { const x = (pos.get(p.a)[0] + pos.get(p.b)[0]) / 2, y = (pos.get(p.a)[1] + pos.get(p.b)[1]) / 2;
+      return `<g class="lb" data-a="${p.a}" data-b="${p.b}" style="transform:translate(${x}px,${y}px)" onclick="showDiff(${p.a},${p.b})"><rect x="-17" y="-10" width="34" height="20" rx="6" style="fill:${sev(p.sim)}"/><text x="0" y="4">${Math.round(p.sim * 100)}%</text></g>`; }).join("");
+    return `<div class="ring"><h4><span class="sw" style="background:${COLORS[gi % COLORS.length]}"></span>Ring ${gi + 1}: ${g.size} files share code ${badge(top)}</h4><div class="stage"><canvas></canvas><svg viewBox="0 0 400 230">${lines}${nodes}${labels}</svg></div></div>`;
+  }).join("");
+  const clean = data.map((d, i) => gColor.has(i) ? null : d.name).filter(Boolean);
+  $("clean").innerHTML = clean.length ? `<b>No match found (${clean.length}):</b> ` + clean.slice(0, 20).map(n => `<span class="chip">${esc(n)}</span>`).join("") + (clean.length > 20 ? ` +${clean.length - 20} more` : "") : "";
+  wireRings(states);
+}
+/* Ring canvas: faint honeycomb, glowing links, and a filled triangle wherever three files all match each other.
+   The only motion is a one-time electric zap that forms the ring when it scrolls into view. */
+const HR = 13, HW = Math.sqrt(3) * HR, HC = Math.ceil(400 / HW) + 2, HRW = Math.ceil(230 / (1.5 * HR)) + 2, HIVES = new Set(); let hraf = 0;
+const GRID = new Path2D();
+for (let r = 0; r < HRW; r++) for (let c = 0; c < HC; c++) { const cx = c * HW + (r % 2 ? HW / 2 : 0), cy = r * 1.5 * HR;
+  for (let i = 0; i < 6; i++) { const a = Math.PI / 6 + i * Math.PI / 3; GRID[i ? "lineTo" : "moveTo"](cx + HR * Math.cos(a), cy + HR * Math.sin(a)); } GRID.closePath(); }
+const rgbOf = c => c[0] === "#" ? [1, 3, 5].map(i => parseInt(c.substr(i, 2), 16)).join(",") : (c.match(/\d+/g) || [140, 143, 255]).slice(0, 3).join(",");
+const ez = t => t * t * (3 - 2 * t), ZD = 380;
+const line = (g, pts, col, lw, al) => { g.beginPath(); g.moveTo(...pts[0]); g.lineTo(...pts[1]); g.globalAlpha = al; g.strokeStyle = col; g.lineWidth = lw; g.stroke(); g.globalAlpha = 1; };
+function hframe(H, now) {
+  const { cv, g } = H, w = cv.clientWidth; if (!w) return;
+  const dpr = window.devicePixelRatio || 1, pw = Math.round(w * dpr);
+  if (cv.width !== pw) { cv.width = pw; cv.height = Math.round(w * 230 / 400 * dpr); }
+  const k = cv.width / 400, hv = H.hov, P = id => H.pos.get(id); g.setTransform(k, 0, 0, k, 0, 0); g.clearRect(0, 0, 400, 230); g.lineCap = "round";
+  g.lineWidth = .7; g.strokeStyle = "rgba(130,95,135,.13)"; g.stroke(GRID);
+  H.pos.forEach(([x, y]) => { const gr = g.createRadialGradient(x, y, 0, x, y, 34); gr.addColorStop(0, `rgba(${H.rc},.28)`); gr.addColorStop(1, `rgba(${H.rc},0)`); g.fillStyle = gr; g.fillRect(x - 34, y - 34, 68, 68); });
+  H.T.forEach(t => { if (!H.RM && now < t.t0) return; const p = H.RM ? 1 : Math.min(1, (now - t.t0) / 700), [A, B, C] = t.ids.map(P);   // snaps on, then settles
+    g.beginPath(); g.moveTo(...A); g.lineTo(...B); g.lineTo(...C); g.closePath(); g.fillStyle = `rgba(${t.rgb},${(.2 + .4 * (1 - p) * (1 - p)) * (hv === null || t.ids.includes(hv) ? 1 : .3)})`; g.fill(); });
+  H.E.forEach(e => { const sh = H.RM ? 1 : now < e.t0 ? 0 : ez(Math.min(1, (now - e.t0) / ZD)); if (sh <= 0) return;
+    const A = P(e.a), B = P(e.b), at = t => [A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t], dim = hv !== null && e.a !== hv && e.b !== hv ? .2 : 1, col = `rgb(${e.rgb})`;
+    line(g, [A, at(sh)], col, e.lw + 5, .2 * dim); line(g, [A, at(sh)], col, e.lw, .95 * dim);
+    if (sh < 1) { const z = [at(Math.max(0, sh - .28)), at(sh)]; line(g, z, col, 9, .45); line(g, z, "#fff", 2.6, 1); }             // the zap
+    const q = (now - e.t0 - ZD) / 450; if (!H.RM && q >= 0 && q < 1) { g.beginPath(); g.arc(B[0], B[1], 14 + 22 * q, 0, 7); g.strokeStyle = `rgba(${e.rgb},${1 - q})`; g.lineWidth = 2; g.stroke(); } });  // arrival ripple
+}
+function hloop(now) { hraf = 0;
+  HIVES.forEach(H => { if (!H.svg.isConnected) { HIVES.delete(H); return; } if (!H.vis) return; const w = H.cv.clientWidth; if (w !== H.w) { H.w = w; H.until = Math.max(H.until, now + 150); } if (now < H.until) hframe(H, now); });
+  if (HIVES.size) hraf = requestAnimationFrame(hloop); }
+function hive(svg, pos) {
+  const stage = svg.parentNode, cv = stage.querySelector("canvas"), RM = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const E = [...svg.querySelectorAll(".edge")].map(l => ({ a: +l.dataset.a, b: +l.dataset.b, rgb: rgbOf(l.getAttribute("stroke")), lw: 1.4 + (parseFloat(l.getAttribute("stroke-width")) - 2) * .45, t0: 0 }));
+  const ed = (u, v) => E.find(e => (e.a === u && e.b === v) || (e.a === v && e.b === u)), ids = [...pos.keys()], T = [];
+  for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) for (let m = j + 1; m < ids.length; m++) { const es = [ed(ids[i], ids[j]), ed(ids[j], ids[m]), ed(ids[i], ids[m])]; if (es.every(Boolean)) T.push({ ids: [ids[i], ids[j], ids[m]], es, rgb: es.reduce((x, y) => y.lw < x.lw ? y : x).rgb, t0: 0 }); }
+  const deg = id => E.filter(e => e.a === id || e.b === id).length, hub = ids.slice().sort((x, y) => deg(y) - deg(x))[0], seen = new Set([hub]), q = [hub], tree = [];
+  while (q.length) { const u = q.shift(); E.forEach((e, i) => { const v = e.a === u ? e.b : e.b === u ? e.a : null; if (v !== null && !seen.has(v)) { seen.add(v); q.push(v); tree.push(i); } }); }   // zaps spread outward from the busiest file
+  const order = [...tree, ...E.map((_, i) => i).filter(i => !tree.includes(i))], rect = svg.querySelector(".nd rect");
+  const H = { svg, stage, cv, g: cv.getContext("2d"), E, T, pos, RM, vis: false, formed: false, hov: null, until: 0, w: 0, rc: rgbOf(rect ? rect.style.stroke || "" : "") };
+  const reveal = () => { H.vis = true; if (H.formed) return; H.formed = true; stage.classList.add("go"); const base = performance.now() + 900;
+    order.forEach((ei, k) => E[ei].t0 = base + k * 300); T.forEach(t => t.t0 = Math.max(...t.es.map(e => e.t0)) + ZD); H.until = RM ? performance.now() + 300 : base + order.length * 300 + ZD + 1300; };
+  if ("IntersectionObserver" in window) new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) reveal(); else H.vis = false; }), { threshold: .35 }).observe(svg); else reveal();
+  const wake = () => { H.until = Math.max(H.until, performance.now() + 150); };
+  svg.addEventListener("pointermove", wake);                                  // keeps the glow in step while a file is dragged
+  svg.addEventListener("pointerover", ev => { const n = ev.target.closest && ev.target.closest(".nd"), id = n ? +n.dataset.id : null; if (id !== H.hov) { H.hov = id; wake(); } });
+  HIVES.add(H); if (!hraf) hraf = requestAnimationFrame(hloop);
+}
+function wireRings(states) {
+  document.querySelectorAll("#graph .ring svg").forEach((svg, k) => {
+    const { pos } = states[k]; hive(svg, pos);
+    const upd = () => {
+      svg.querySelectorAll(".nd").forEach(g => { const q = pos.get(+g.dataset.id); g.style.transform = `translate(${q[0]}px,${q[1]}px)`; });
+      svg.querySelectorAll(".edge").forEach(l => { const a = pos.get(+l.dataset.a), b = pos.get(+l.dataset.b); l.setAttribute("x1", a[0]); l.setAttribute("y1", a[1]); l.setAttribute("x2", b[0]); l.setAttribute("y2", b[1]); });
+      svg.querySelectorAll(".lb").forEach(g => { const a = pos.get(+g.dataset.a), b = pos.get(+g.dataset.b); g.style.transform = `translate(${(a[0] + b[0]) / 2}px,${(a[1] + b[1]) / 2}px)`; });
+    };
+    const focus = id => svg.querySelectorAll(".edge,.lb").forEach(e => e.classList.toggle("dim", id !== null && +e.dataset.a !== id && +e.dataset.b !== id));
+    let drag = null;
+    svg.querySelectorAll(".nd").forEach(g => { const id = +g.dataset.id;
+      g.onpointerenter = () => focus(id); g.onpointerleave = () => { if (drag === null) focus(null); };
+      g.onpointerdown = e => { drag = id; svg.classList.add("drag"); g.setPointerCapture(e.pointerId); e.preventDefault(); };
+      g.onpointermove = e => { if (drag !== id) return; const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const q = pt.matrixTransform(svg.getScreenCTM().inverse()); pos.set(id, [Math.max(55, Math.min(345, q.x)), Math.max(20, Math.min(210, q.y))]); upd(); };
+      g.onpointerup = () => { drag = null; svg.classList.remove("drag"); focus(null); }; });
+    if ("IntersectionObserver" in window) { const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { svg.classList.add("go"); io.disconnect(); } }, { threshold: .35 }); io.observe(svg); } else svg.classList.add("go");
+  });
+}
+
+/* Heatmap: rows and columns grouped by ring, so rings appear as dark blocks. */
+function drawHeat() {
+  const { gList } = analysis.cur, { data } = analysis;
+  const ids = gList.flatMap(g => [...g]).slice(0, 18);
+  $("heatcard").hidden = ids.length < 2;
+  if (ids.length < 2) return;
+  const h = $("heat");
+  h.style.gridTemplateColumns = `auto repeat(${ids.length}, 1fr)`;
+  h.innerHTML = `<div></div>` + ids.map((_, c) => `<div class="l" style="text-align:center">${c + 1}</div>`).join("") +
+    ids.map((r, ri) => `<div class="l">${ri + 1}. ${esc(data[r].name)}</div>` + ids.map(c => {
+      const s = r === c ? 1 : sim(r, c);
+      return `<div class="c" style="background:rgba(var(--rgb),${s ? 0.12 + s * 0.8 : 0.04})" title="${esc(data[r].name)} / ${esc(data[c].name)}: ${Math.round(s * 100)}%" ${r === c ? "" : `onclick="showDiff(${r},${c})"`}>${r === c ? "" : s ? Math.round(s * 100) : ""}</div>`;
+    }).join("")).join("");
+}
+
+function exportCsv() {
+  const { data } = analysis, rows = [["file_a", "file_b", "similarity_percent", "shared_fingerprints", "verdict"]];
+  analysis.cur.flagged.forEach(p => rows.push([data[p.a].name, data[p.b].name, Math.round(p.sim * 100), p.shared, verdict(p.sim)[0]]));
+  const url = URL.createObjectURL(new Blob([rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n")], { type: "text/csv" }));
+  Object.assign(document.createElement("a"), { href: url, download: "copycatch-report.csv" }).click();
+  URL.revokeObjectURL(url);
+}
+$("csv").onclick = exportCsv;
+
+/* Side-by-side view. Green = LCS match (same line, same order).
+   Amber = shares a winnowing fingerprint but is not in the LCS, i.e. moved or reordered code. */
+function showDiff(a, b) {
+  const A = analysis.data[a], B = analysis.data[b];
+  const L = lcsLines(A.rows, B.rows);
+  const fpLines = (X, Y) => {
+    const s = new Set();
+    X.byHash.forEach((positions, h) => {
+      if (!Y.byHash.has(h)) return;
+      positions.forEach(p => { for (let t = p; t < p + K; t++) if (X.lines[t]) s.add(X.lines[t]); });
+    });
+    return s;
+  };
+  const paint = (X, lcs, fp) => X.text.split("\n").map((l, i) => {
+    const n = i + 1, c = lcs.has(n) ? "hit" : fp.has(n) ? "mv" : "";
+    return `<span class="${c}"><i>${n}</i>${esc(l) || " "}</span>`;
+  }).join("");
+  const pct = Math.round(100 * L.len / Math.max(1, Math.min(A.rows.length, B.rows.length)));
+  $("diffcard").hidden = false;
+  $("difftitle").textContent = `${A.name} vs ${B.name}: LCS matches ${L.len} lines in order (${pct}% of the shorter file)`;
+  $("da").innerHTML = paint(A, L.a, fpLines(A, B));
+  $("db").innerHTML = paint(B, L.b, fpLines(B, A));
+  $("diffcard").scrollIntoView({ behavior: "smooth" });
+}
+
+/* ----- inputs ----- */
+async function load(list) {
+  files = await Promise.all([...list].filter(f => f.size < 2e6).map(async f => ({ name: f.name, text: await f.text() })));
+  SRC = "your files";
+  analyze();
+}
+$("files").onchange = async e => { await load(e.target.files); e.target.value = ""; };
+const drop = $("drop");
+["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => load(e.dataTransfer.files));
+$("th").oninput = render;
+
+const ORIGINAL = `// compute average and highest mark
+function analyse(marks) {
+  let total = 0;
+  let best = marks[0];
+  for (let i = 0; i < marks.length; i++) {
+    total += marks[i];
+    if (marks[i] > best) { best = marks[i]; }
+  }
+  return { avg: total / marks.length, best: best };
+}
+function grade(score) {
+  if (score >= 90) return "A";
+  if (score >= 75) return "B";
+  if (score >= 50) return "C";
+  return "F";
+}
+function report(list) {
+  const out = [];
+  for (const m of list) { out.push(grade(m)); }
+  return out;
+}`;
+$("sample").onclick = () => {
+  SRC = "the sample batch";
+  const [head, tail] = ORIGINAL.split("function grade");
+  files = [
+    { name: "alice.js", text: ORIGINAL },
+    { name: "bob.js", text: ORIGINAL.replace(/marks/g, "scores").replace(/total/g, "sum").replace(/best/g, "top").replace(/\/\/.*/, "/* my own work */") },
+    { name: "carol.js", text: `function reverse(s) {\n  let r = "";\n  for (let i = s.length - 1; i >= 0; i--) { r += s[i]; }\n  return r;\n}\nfunction isPal(s) {\n  return reverse(s) === s;\n}\nfunction countVowels(s) {\n  let c = 0;\n  for (const ch of s) { if ("aeiou".includes(ch)) c++; }\n  return c;\n}` },
+    { name: "dave.js", text: "function grade" + tail.replace(/out/g, "res") + "\n" + head.replace(/marks/g, "arr") },   // reordered functions
+    { name: "eve.js", text: `function fib(n) {\n  if (n < 2) return n;\n  return fib(n - 1) + fib(n - 2);\n}\nfunction fact(n) {\n  let r = 1;\n  while (n > 1) { r *= n; n--; }\n  return r;\n}\nfunction gcd(a, b) {\n  while (b) { const t = b; b = a % b; a = t; }\n  return a;\n}` }
+  ];
+  analyze();
+};
+
+/* Stress test: 300 random programs with 3 planted copies, to show the index scales. */
+$("stress").onclick = () => {
+  SRC = "the 300-file stress test";
+  const sym = "if else for while return + - * / = ( ) { } ; , < > == && || [ ] ! . ? :".split(" ");
+  let seed = 42; const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
+  const prog = () => Array.from({ length: 160 }, () => sym[Math.floor(rnd() * sym.length)]).join(" ");
+  files = Array.from({ length: 300 }, (_, i) => ({ name: `s${i}.txt`, text: prog() }));
+  const base = files[0].text.split(" ");
+  files[10].text = base.join(" ") + " ; ; ;";
+  files[20].text = base.slice(60).join(" ") + " " + prog().slice(0, 200);
+  files[30].text = base.slice(0, 100).join(" ");
+  analyze();
+};
+
+$("demo").onclick = () => { $("sample").click(); const p = analysis.pairs[0]; if (p) showDiff(p.a, p.b); };
+window.showDiff=showDiff;$('sample').click();
+})();
+(function(){
+const COLORS = ["#FFD700", "#825F87", "#825F87", "#FFD700", "#825F87", "#825F87"]; let lastSig = null, N = [..."ABCDEF"], QP = null, PERS = {}, SETL = null, SETN = ["File A", "File B"], IDXF = null, LNA = "file A", LNB = "file B";
+const mk = () => { const F = []; return [F, (lines, msg, html) => F.push({ lines, msg, html })]; };
+const chip = (t, c = "") => `<span class="tk big ${c}">${esc(String(t))}</span>`;
+const frame = (arr, i, mi) => `<div class="tks rk" style="padding-left:${i * 32}px">${arr.map((v, k) => `<span class="tk min ${k === mi ? "w" : ""}">${v}</span>`).join("")}</div>`;
+const KV = o => `<div class="kv">${Object.entries(o).map(([k, v]) => `<div>${k}<span>${v ?? "?"}</span></div>`).join("")}</div>`;
+function prep() {
+  QP = null; PERS = {};
+  try {
+    const A = analysis; if (!A || A.data.length < 2) return;
+    const sig = A.data.map(d => d.name).join("|"), fresh = sig !== lastSig; lastSig = sig;
+    const pc = p => p.sim <= 1 ? Math.round(p.sim * 100) : Math.round(p.sim), PS = [...A.pairs].sort((x, y) => y.sim - x.sim);
+    const all = A.data.map(d => d.name.replace(/\.[^.]*$/, "").replace(/\W/g, "_").slice(0, 6) || "f"), seen = new Map();
+    all.forEach((x, i) => { const c = seen.get(x) || 0; seen.set(x, c + 1); if (c) all[i] = x.slice(0, 5) + c; });
+    const ids = []; for (const p of PS) { for (const x of [p.a, p.b]) if (ids.length < 6 && !ids.includes(x)) ids.push(x); }
+    for (let i = 0; ids.length < Math.min(6, A.data.length); i++) if (!ids.includes(i)) ids.push(i);
+    N = ids.map(i => all[i]); const loc = new Map(ids.map((g, l) => [g, l]));
+    const pairs = PS.filter(p => loc.has(p.a) && loc.has(p.b)).map(p => [loc.get(p.a), loc.get(p.b), pc(p)]);
+    QP = { A, ids, pairs, top: PS[0] || null, all };
+    const f0 = A.data[ids[0]], t0 = tokenize(f0.text), ln0 = f0.text.split("\n").map(x => x.trim()).filter(x => x && !/^(\/\/|#|\/\*|\*)/.test(x));
+    if (fresh) { SC.text = ln0.slice(0, 3).join("\n").slice(0, 150); HM.text = ln0.slice(0, 2).join(" ").slice(0, 120); }
+    if (fresh && t0.norm.length > 5) RL.text = t0.norm.slice(0, 12).join(" ");
+    const hh = kgramHashes(t0.ids).slice(0, 9).map(h => h % 100); if (fresh && hh.length >= 5) WN.H = hh;
+    PERS.scan = PERS.map = PERS.roll = PERS.win = f0.name;
+    if (pairs.length >= 3) { S.arr = pairs.slice(0, 7).map(p => p[2]); PERS.sort = "the similarity scores of your pairs"; }
+    PERS.uf = PERS.matrix = PERS.best = PERS.idx = N.join(", ");
+    const top = PS[0];
+    if (top) PERS.rk = A.data[top.a].name + " and " + A.data[top.b].name;
+    if (top && fresh) {
+      const nl = i => A.data[i].text.split("\n").map(x => x.trim()).filter(x => x && !/^(\/\/|#|\/\*|\*)/.test(x));
+      let found = null;
+      for (const tl of nl(top.b)) { const T = tl.slice(0, 26); for (const al of nl(top.a)) for (let L = 8; L >= 4 && !found; L--) for (let q = 0; q + L <= al.length && !found; q++) { const sn = al.substr(q, L); if (sn === sn.trim() && /\w/.test(sn) && T.includes(sn)) found = { T, sn }; } if (found) break; }
+      if (found) { RKS.text = RKDEF.text = found.T; RKS.pat = RKDEF.pat = found.sn; RKS.from = RKDEF.from = A.data[top.a].name; RKS.to = RKDEF.to = A.data[top.b].name; RKS.on = true; }
+    }
+    if (top) {
+      const fp = i => [...A.data[i].byHash].flatMap(([h, ps]) => ps.map(p => [p, h % 1000])).sort((x, y) => x[0] - y[0]).map(x => x[1]).slice(0, 7);
+      SETL = [fp(top.a), fp(top.b)]; SETN = [A.data[top.a].name, A.data[top.b].name]; PERS.set = SETN.join(" vs ");
+      const ln = i => A.data[i].text.split("\n").map(l => tokenize(l).norm.join(" ")).filter(l => l.includes(" ")).map(l => l.slice(0, 22)).slice(0, 6);
+      const la = ln(top.a), lb = ln(top.b); if (la.length > 1 && lb.length > 1) { LA = la; LB = lb; LNA = SETN[0]; LNB = SETN[1]; PERS.lcs = SETN.join(" vs "); }
+    }
+    const ch = ids.slice(0, 5), sets = ch.map(i => new Set([...A.data[i].byHash.keys()].map(h => h % 1000)));
+    IDXF = Object.fromEntries(ch.map((g, k) => [all[g], [...sets[k]].sort((x, y) => sets.filter(z => z.has(y)).length - sets.filter(z => z.has(x)).length).slice(0, 6)]));
+  } catch (e) { QP = null; }
+}
+window.labRefresh = () => { if (cur) pick(cur.id); };
+const rnd = (n, lo, hi) => Array.from({ length: n }, () => lo + Math.floor(Math.random() * (hi - lo)));
+
+/* ---------- 1. Sorting ---------- */
+const S = { arr: [64, 25, 91, 40, 78, 12, 55], desc: false };
+const bars = (a, c) => `<div class="bars">${a.map((v, k) => `<div class="bw"><div class="b ${c[k] || ""}" style="height:${v}%"></div><b>${v}</b><i>${k}</i></div>`).join("")}</div><div class="leg">orange = best so far, blue = being compared, pink = swapping, green = finished</div>`;
+function buildSort() {
+  const a = [...S.arr], n = a.length, [F, fr] = mk(), w = S.desc ? "largest" : "smallest", better = (x, y) => S.desc ? x > y : x < y;
+  const done = i => Object.fromEntries([...Array(i).keys()].map(k => [k, "done"]));
+  fr([], `Unsorted list of similarity scores. Goal: ${S.desc ? "highest first, the order CopyCatch ranks pairs in" : "smallest first"}.`, bars(a, {}));
+  for (let i = 0; i < n - 1; i++) {
+    let m = i;
+    fr([3, 4], `Pass ${i + 1}: assume position ${i} (value ${a[i]}) is the ${w} of the unsorted part.`, bars(a, { ...done(i), [m]: "min" }));
+    for (let j = i + 1; j < n; j++) {
+      const b = better(a[j], a[m]);
+      fr([5, 6], `Compare ${a[j]} with the best so far (${a[m]}): ${b ? "it is better, so it becomes the new best" : "not better, keep going"}.`, bars(a, { ...done(i), [m]: "min", [j]: "cur" }));
+      if (b) m = j;
+    }
+    fr([7], m !== i ? `Swap the best (${a[m]}) into position ${i}.` : `Position ${i} already holds the ${w}, no swap needed.`, bars(a, { ...done(i), [i]: "swap", [m]: "swap" }));
+    [a[i], a[m]] = [a[m], a[i]];
+  }
+  fr([], "Sorted. In CopyCatch this ordering puts the most similar pair at the top of the list.", bars(a, done(n)));
+  return F;
+}
+
+/* ---------- 2. Hash map ---------- */
+const HM = { text: "for (i = 0; i < 5; i++) { total += i; }" };
+function buildMap() {
+  const T = tokenize(HM.text).norm.slice(0, 16), map = new Map(), ids = [], [F, fr] = mk();
+  const vis = (i, hl) => vis0(i, hl) + KV({ t: i < 0 ? null : T[i], id: i < 0 ? null : map.get(T[i]), "vocab.size": map.size, "ids.length": ids.length }), vis0 = (i, hl) => `<div class="tks">${T.map((t, k) => `<span class="tk ${k === i ? "w" : ""}">${esc(t)}</span>`).join("")}</div><b>vocab (hash map)</b><div class="kv">${[...map].map(([k, v]) => `<div class="${k === hl ? "hl" : ""}">${esc(k)}<span>${v}</span></div>`).join("") || "empty"}</div><div>ids so far: <b>${ids.join(" ")}</b></div>`;
+  fr([0, 1], "A hash map stores token to id pairs. Looking a token up takes about one step, however many tokens are stored.", vis(-1));
+  T.forEach((t, i) => {
+    const had = map.has(t);
+    fr([2, 3, 4], `Read token "${t}". Is it already in the map? ${had ? "Yes." : "No."}`, vis(i, had ? t : null));
+    if (!had) { map.set(t, map.size + 1); fr([5, 6], `Not found, so store it with the next free id: ${map.size}.`, vis(i, t)); }
+    ids.push(map.get(t)); fr([8], `Append id ${map.get(t)} to the file's id list.`, vis(i, t));
+  });
+  return F;
+}
+
+/* ---------- 3. Rabin-Karp rolling hash ---------- */
+const RL = { text: "if a < b ; if a < b ; return 1", k: 3 };
+function buildRoll() {
+  const raw = RL.text.trim().split(/\s+/).slice(0, 14), voc = new Map(), D = raw.map(t => { if (!voc.has(t)) voc.set(t, voc.size + 1); return voc.get(t); });
+  const k = Math.min(Math.max(RL.k, 2), D.length), B = 131, M = 1000003, [F, fr] = mk(), hs = [], st = { pow: null, h: null };
+  const vis = (i, out, inn) => `<div class="tks rk">${D.map((d, j) => `<span class="tk ${j >= i && j < i + k && i >= 0 ? "w" : ""} ${j === out ? "out" : ""} ${j === inn ? "in" : ""}">${d}</span>`).join("")}</div>` + (i >= 0 ? frame(D.slice(i, i + k), i, -1) : "") +
+    `<div class="leg">${[...voc].map(([t, v]) => `${v} = ${esc(t)}`).join("  ·  ")}</div>` +
+    KV({ K: k, BASE: B, pow: st.pow, h: st.h, "out.length": hs.length || null }) + `<p>out: <b>[${hs.join(", ")}]</b></p>`;
+  if (D.length < 2) { fr([], "Type at least 2 tokens separated by spaces.", vis(-1)); return F; }
+  fr([0, 1, 2], `Each token has an id (top row: the token, bottom row: its id). Window size K = ${k}, BASE = ${B}, MOD = ${M}.`, vis(-1));
+  let pw = 1; for (let i = 0; i < k - 1; i++) pw = pw * B % M; st.pow = pw;
+  fr([3, 4, 5], `pow = ${B}^${k - 1} mod ${M} = ${pw}. This is the weight of the leftmost token, needed later to drop it.`, vis(-1));
+  let h = 0; for (let i = 0; i < k; i++) h = (h * B + D[i]) % M; st.h = h; hs.push(h);
+  fr([6, 7, 8, 9], `First window: h = ${D.slice(0, k).map((d, j) => `${d} x ${B}^${k - 1 - j}`).join(" + ")} (mod ${M}) = ${h}.`, vis(0));
+  for (let i = 1; i + k <= D.length; i++) {
+    const o = D[i - 1], n = D[i + k - 1], mid = ((h - o * pw) % M + M) % M;
+    fr([11], `Drop "${raw[i - 1]}" (id ${o}): (${h} - ${o} x ${pw}) mod ${M} = ${mid}.`, vis(i - 1, i - 1));
+    h = (mid * B + n) % M; st.h = h; hs.push(h);
+    fr([12, 13], `Add "${raw[i + k - 1]}" (id ${n}): (${mid} x ${B} + ${n}) mod ${M} = ${h}. Two operations, not a re-hash of ${k} tokens.`, vis(i, -1, i + k - 1));
+  }
+  const dup = hs.filter((v, j) => hs.indexOf(v) !== j).length;
+  fr([15], `${hs.length} windows hashed. ${dup} window${dup === 1 ? " repeats" : "s repeat"} an earlier hash: that is how a copied run shows up.`, vis(D.length - k));
+  return F;
+}
+
+/* ---------- 4. Winnowing ---------- */
+const WN = { H: [77, 74, 42, 17, 98, 50, 17, 40, 38], w: 4 };
+function buildWin() {
+  const rkc = (t, c) => `<span class="tk ${c}">${esc(String(t))}</span>`;
+  const H = WN.H, w = WN.w, [F, fr] = mk(), kept = new Set(); let last = -1;
+  const vis = (i, m) => vis0(i, m) + KV({ w, i: i < 0 ? null : i, min: m < 0 ? null : m, lastPos: last < 0 ? null : last, "fp.length": kept.size }), vis0 = (i, m) => `<div class="tks rk">${H.map((h, j) => rkc(h, `${j >= i && j < i + w && i >= 0 ? "w" : ""} ${kept.has(j) ? "kept" : ""} ${j === m ? "min" : ""}`)).join("")}</div>${i >= 0 ? frame(H.slice(i, i + w), i, m - i) : ""}<p>fingerprints kept: <b>${[...kept].map(j => H[j]).join(", ") || "none"}</b></p><div class="leg">blue = current window, outline = its smallest, filled = kept</div>`;
+  fr([], `${H.length} hashes in a row. Keep only the smallest hash of every window of ${w}.`, vis(-1, -1));
+  for (let i = 0; i + w <= H.length; i++) {
+    let m = i; for (let j = i + 1; j < i + w; j++) if (H[j] <= H[m]) m = j;
+    fr([3, 4, 5, 6], `Window at ${i}: the smallest is ${H[m]} at position ${m} (rightmost wins ties).`, vis(i, m));
+    if (m !== last) { kept.add(m); last = m; fr([7, 8, 9], `New position, so keep ${H[m]}.`, vis(i, m)); }
+    else fr([7], `Position ${m} was already kept, nothing new.`, vis(i, m));
+  }
+  fr([12], `Kept ${kept.size} of ${H.length} hashes. Any shared run of enough tokens still shares at least one kept hash.`, vis(-1, -1));
+  return F;
+}
+
+/* ---------- 5. Inverted index and pair counting ---------- */
+function buildIndex() {
+  const FL = IDXF || { A: [12, 47, 5, 88, 31], B: [47, 5, 70, 31], C: [99, 13, 70], D: [5, 47, 31, 12] }, idx = new Map(), cnt = new Map(), [F, fr] = mk();
+  const vis = (hl, ph) => vis0(hl, ph) + KV({ "index.size": idx.size, "shared.size": cnt.size }), vis0 = (hl, ph) => `<b>index (hash to files)</b><div class="kv">${[...idx].map(([h, l]) => `<div class="${h === hl ? "hl" : ""}">${h}<span>${l.join(",")}</span></div>`).join("") || "empty"}</div>` +
+    (ph ? `<b>shared fingerprints per pair</b><div class="kv">${[...cnt].map(([k, v]) => `<div class="${k === ph ? "hl" : ""}">${k}<span>${v}</span></div>`).join("")}</div>` : "");
+  fr([], "Files A to D, each with its fingerprints: " + Object.entries(FL).map(([f, l]) => `${f}=[${l}]`).join("  "), vis());
+  Object.entries(FL).forEach(([f, l]) => l.forEach(h => { if (!idx.has(h)) idx.set(h, []); idx.get(h).push(f); fr([1, 2, 3], `File ${f} has fingerprint ${h}: add ${f} to the list for ${h}.`, vis(h)); }));
+  [...idx].filter(([, l]) => l.length > 1).forEach(([h, l]) => {
+    for (let x = 0; x < l.length; x++) for (let y = x + 1; y < l.length; y++) {
+      const k = l[x] + "-" + l[y]; cnt.set(k, (cnt.get(k) || 0) + 1);
+      fr([6, 7, 8, 9, 10], `${h} is in ${l.join(", ")}, so pair ${k} shares one more fingerprint (now ${cnt.get(k)}).`, vis(h, k));
+    }
+  });
+  const names = Object.keys(FL), never = names.flatMap((a, x) => names.slice(x + 1).map(b => a + "-" + b)).find(k => !cnt.has(k) && !cnt.has(k.split("-").reverse().join("-"))), neverMsg = never ? "Pair " + never + " never appeared in any row, so it was never compared." : "Every pair shared at least one fingerprint here."; const sim = [...cnt].map(([k, v]) => { const [a, b] = k.split("-"); return `${k}: ${v} / ${Math.min(FL[a].length, FL[b].length)} = ${Math.round(100 * v / Math.min(FL[a].length, FL[b].length))}%`; });
+  fr([13], `Similarity = shared / size of the smaller file. ${sim.join("; ")}. ${neverMsg}`, vis(null, "none"));
+  return F;
+}
+
+/* ---------- 6. LCS dynamic programming ---------- */
+let LA = ["sum = 0", "top = a[0]", "for each x", "sum += x", "if x > top", "return sum"], LB = ["sum = 0", "print(a)", "for each x", "sum += x", "if x > top", "return top"];
+function buildLcs() {
+  const m = LA.length, n = LB.length, dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(null)), [F, fr] = mk();
+  for (let i = 0; i <= m; i++) dp[i][0] = 0; for (let j = 0; j <= n; j++) dp[0][j] = 0;
+  const vis = (c, p) => vis0(c, p) + KV({ i: c ? c.split(",")[0] : null, j: c ? c.split(",")[1] : null, "dp[i][j]": c ? dp[+c.split(",")[0]][+c.split(",")[1]] : null }), vis0 = (cur, path = new Set()) => `<table class="dp"><tr><th></th><th></th>${LB.map(l => `<th class="v">${l}</th>`).join("")}</tr>` +
+    dp.map((r, i) => `<tr><th class="l">${i ? LA[i - 1] : ""}</th>${r.map((v, j) => `<td class="${v === null ? "hid" : ""} ${i && j && v !== null && LA[i - 1] === LB[j - 1] ? "eq" : ""} ${cur === i + "," + j ? "pth" : ""} ${path.has(i + "," + j) ? "pth" : ""}">${v === null ? "" : v}</td>`).join("")}</tr>`).join("") + "</table>";
+  fr([1, 2], `Rows are ${LNA}'s lines, columns are ${LNB}'s. Row 0 and column 0 start at 0.`, vis());
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) {
+    const eq = LA[i - 1] === LB[j - 1];
+    dp[i][j] = eq ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
+    fr(eq ? [3, 4, 5, 6] : [3, 4, 5, 7], eq ? `"${LA[i - 1]}" equals "${LB[j - 1]}": diagonal ${dp[i - 1][j - 1]} + 1 = ${dp[i][j]}.` : `Lines differ: max(above ${dp[i - 1][j]}, left ${dp[i][j - 1]}) = ${dp[i][j]}.`, vis(i + "," + j));
+  }
+  let i = m, j = n; const path = new Set([i + "," + j]), got = [];
+  fr([8], `Table complete. The corner holds the answer: ${dp[m][n]} matching lines. Now walk back to find which ones.`, vis(null, path));
+  while (i && j) {
+    if (LA[i - 1] === LB[j - 1]) { got.unshift(LA[i - 1]); i--; j--; fr([8], `Equal lines, so this is a match. Go diagonally up-left.`, (path.add(i + "," + j), vis(null, path))); }
+    else if (dp[i - 1][j] >= dp[i][j - 1]) { i--; path.add(i + "," + j); fr([8], "No match here. The larger neighbour is above, so move up.", vis(null, path)); }
+    else { j--; path.add(i + "," + j); fr([8], "No match here. The larger neighbour is to the left, so move left.", vis(null, path)); }
+  }
+  fr([8], `Matching lines in order: ${got.join(", ")}. These are the green lines in the compare view.`, vis(null, path));
+  return F;
+}
+
+/* ---------- 7. Union-Find ---------- */
+function buildUF() {
+  const n = N.length, links = (QP && QP.pairs.length ? QP.pairs : [[0, 1], [1, 2], [2, 3], [4, 5]]).slice(0, 4).map(l => [l[0], l[1]]), p = [...Array(n).keys()], [F, fr] = mk();
+  const root = x => { while (p[x] !== x) x = p[x]; return x; };
+  const col = i => { const r = root(i); return p.some((_, k) => k !== r && root(k) === r) ? COLORS[r % 6] : "#d3c6dc"; };
+  const vis = hl => `<div class="ufrow">${p.map((q, i) => `<div class="un ${hl === i ? "cur" : ""}" style="background:${col(i)}">${N[i]}<small>${q === i ? "root" : "parent " + N[q]}</small></div>`).join("")}</div><p>parent array: <b>[${p.map(q => N[q]).join(", ")}]</b></p>` + KV({ x: hl === undefined ? null : N[hl], rings: new Set(p.map((_, i) => root(i))).size });
+  const find = x => { while (p[x] !== x) {
+      fr([5], `${N[x]} is not a root (its parent is ${N[p[x]]}), so keep climbing.`, vis(x));
+      p[x] = p[p[x]]; fr([6], `Shortcut: point ${N[x]} at its grandparent ${N[p[x]]}. Next time the climb is shorter.`, vis(x)); x = p[x]; fr([7], `Move up to ${N[x]}.`, vis(x)); }
+    return x; };
+  fr([], `${n} files (${N.join(", ")}), each its own ring. Links arrive one at a time: ${links.map(([a, b]) => N[a] + "-" + N[b]).join(", ") || "none"}.`, vis());
+  links.forEach(([a, b]) => {
+    fr([11], `Link ${N[a]}-${N[b]}: find the root of each file.`, vis());
+    const ra = find(a), rb = find(b);
+    if (ra !== rb) { p[ra] = rb; fr([11], `Different roots, so merge: parent of ${N[ra]} becomes ${N[rb]}.`, vis(ra)); } else fr([11], "Same root, already one ring.", vis());
+  });
+  if (links.length) { fr([4], `Query: which ring is ${N[links[0][0]]} in? Call find(${N[links[0][0]]}).`, vis(links[0][0])); find(links[0][0]); }
+  const g = {}; p.forEach((_, i) => (g[root(i)] = g[root(i)] || []).push(N[i]));
+  const rings = Object.values(g).filter(x => x.length > 1).map(x => "{" + x.join(",") + "}");
+  fr([], `Rings found: ${rings.join(" and ") || "none"}. In the detector this builds the ring cards.`, vis());
+  return F;
+}
+
+/* ---------- 8. Why the index wins ---------- */
+function buildRace() {
+  const [F, fr] = mk(), max = 1000 * 999 / 2;
+  if (QP) { const nv = QP.A.naiveChecks, ix = QP.A.pairs.length, wd = v => Math.max(3, 100 * Math.log10(v + 1) / Math.log10(max + 1));
+    fr([1, 2, 3, 5], `Your batch: ${QP.A.data.length} files. Comparing every pair needs ${nv.toLocaleString()} checks. The index only had to look at the ${ix.toLocaleString()} pairs that really share a fingerprint.`, `<div class="cmp"><div style="width:${wd(nv)}%;background:#FFD700">every pair: ${nv.toLocaleString()}</div><div style="width:${wd(ix)}%;background:#825F87">index: ${ix.toLocaleString()}</div></div><div class="leg">bar lengths use a log scale</div>`); }
+  [10, 50, 100, 300, 1000].forEach(n => {
+    const naive = n * (n - 1) / 2, idx = Math.round(n * 1.5), w = v => Math.max(3, 100 * Math.log10(v + 1) / Math.log10(max + 1));
+    fr([1, 2, 3, 5], `${n} files: comparing every pair needs ${naive.toLocaleString()} checks. The index only checks pairs that share a fingerprint, about ${idx.toLocaleString()} if each file shares with 3 others (an assumption for illustration).`,
+      `<div class="cmp"><div style="width:${w(naive)}%;background:#FFD700">every pair: ${naive.toLocaleString()}</div><div style="width:${w(idx)}%;background:#825F87">index: ${idx.toLocaleString()}</div></div><div class="leg">bar lengths use a log scale</div>`);
+  });
+  if (QP && QP.top) { const T = QP.top, pc = Math.round(T.sim <= 1 ? T.sim * 100 : T.sim), a = QP.A.data[T.a].name, b = QP.A.data[T.b].name;
+    fr([], `Back to your files: ${a} and ${b} came out ${pc}% similar. The tokenizer, hashes, fingerprints, index, sorting and rings you just watched are the steps that produced that number.`, `<div class="cmp"><div style="width:${Math.max(pc, 8)}%;background:#FFD700">${esc(a)} vs ${esc(b)}: ${pc}%</div></div>`); }
+  return F;
+}
+
+/* ---------- 0. Rabin-Karp string search (the classic version) ---------- */
+const RKS = { text: "total = total + marks[i];", pat: "marks", on: true, from: "one student's file", to: "another student's file" }, RKDEF = { text: RKS.text, pat: RKS.pat, from: RKS.from, to: RKS.to };
+function buildRK() {
+  const t = RKS.text.slice(0, 26), p = RKS.pat, n = t.length, m = p.length, base = 256, mod = 101, [F, fr] = mk();
+  const st = { h: null, ph: null, wh: null, M: [], cmp: 0 }, lab = c => c === " " ? "\u2423" : c;
+  const vis = i => `<div class="tks rk">${[...t].map((c, j) => `<span class="tk ${i >= 0 && j >= i && j < i + m ? "w" : ""} ${st.M.some(s => j >= s && j < s + m) ? "kept" : ""}">${lab(c)}</span>`).join("")}</div>` +
+    `<div class="tks rk" style="padding-left:${Math.max(i, 0) * 32}px">${[...p].map(c => `<span class="tk min">${lab(c)}</span>`).join("")}</div>` +
+    `<div class="kv"><div>h<span>${st.h ?? "?"}</span></div><div>patternHash<span>${st.ph ?? "?"}</span></div><div class="${st.ph !== null && st.ph === st.wh ? "hl" : ""}">windowHash<span>${st.wh ?? "?"}</span></div><div>matches<span>[${st.M.join(", ")}]</span></div><div>character comparisons<span>${st.cmp}</span></div></div>` +
+    `<div class="leg">blue = current window, outlined = the pattern, filled = confirmed match</div>`;
+  if (!m || m > n) { fr([], "The pattern must be non-empty and no longer than the text.", vis(-1)); return F; }
+  fr([0, 1, 2, 3], `${RKS.on ? `Plagiarism check: is the snippet "${p}" from ${RKS.from} inside this line of ${RKS.to}? ` : ""}Text has n = ${n} characters, pattern has m = ${m}. Base ${base}, modulus ${mod}. The pattern slides along the text one position at a time.`, vis(-1));
+  let h = 1; for (let i = 0; i < m - 1; i++) h = h * base % mod; st.h = h;
+  fr([3, 4], `h = ${base}^${m - 1} mod ${mod} = ${h}. This is the weight of the leftmost character, needed later to drop it from the hash.`, vis(-1));
+  let ph = 0, wh = 0; for (let i = 0; i < m; i++) { ph = (base * ph + p.charCodeAt(i)) % mod; wh = (base * wh + t.charCodeAt(i)) % mod; } st.ph = ph; st.wh = wh;
+  fr([5, 6, 7, 8], `patternHash = ${ph} and the first windowHash = ${wh}. Each is one small number, so comparing a whole window costs a single comparison.`, vis(0));
+  for (let i = 0; i <= n - m; i++) {
+    if (ph !== wh) fr([9, 10, 11], `Window "${t.substr(i, m)}": hash ${wh} differs from ${ph}, so skip it without reading any characters.`, vis(i));
+    else {
+      let c = 0; while (c < m && t[i + c] === p[c]) c++;
+      const full = c === m; st.cmp += full ? m : c + 1;
+      if (full) { st.M.push(i); fr([10, 11, 12], `Hash ${wh} equals ${ph}. regionMatches compares the characters: all ${m} match, so record a match at index ${i}.`, vis(i)); }
+      else fr([10, 11], `Hash ${wh} equals ${ph}, but the text differs after ${c} matching character${c === 1 ? "" : "s"}: a spurious hit (hash collision). The character check catches it.`, vis(i));
+    }
+    if (i < n - m) {
+      const a = t.charCodeAt(i), b = t.charCodeAt(i + m), old = wh; let raw = (base * (wh - a * h) + b) % mod; const neg = raw < 0; if (neg) raw += mod; wh = raw; st.wh = wh;
+      fr([14, 15, 16, 17], `Slide: drop "${lab(t[i])}" (${a}), add "${lab(t[i + m])}" (${b}). windowHash = (${base} x (${old} - ${a} x ${h}) + ${b}) mod ${mod}${neg ? ", negative so add " + mod : ""} = ${wh}.`, vis(i + 1));
+    }
+  }
+  fr([20], `${RKS.on && st.M.length ? "Found: that snippet really is in the other file, which is how copied code gets noticed. " : ""}Done. Matches at [${st.M.join(", ")}] using ${st.cmp} character comparisons. Typical case: about n + m work. Worst case: many hash hits force full checks, up to n x m.`, vis(-1));
+  return F;
+}
+
+/* ---------- 9. Tokenizer: one linear scan ---------- */
+const SC = { text: 'total += 5; // add\nname = "Ann";' };
+function buildScan() {
+  const re = /\/\/.*|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\d+\.?\d*|[A-Za-z_]\w*|\S/g, toks = [], out = [], [F, fr] = mk(); let m;
+  while ((m = re.exec(SC.text.slice(0, 160))) && toks.length < 22) toks.push(m[0]);
+  const vis = i => vis0(i) + KV({ t: i < 0 ? null : toks[i], "norm.length": out.length }), vis0 = i => `<div class="tks">${toks.map((t, k) => `<span class="tk ${k === i ? "w" : ""}">${esc(t.length > 9 ? t.slice(0, 8) + "..." : t)}</span>`).join("")}</div><b>normalised output</b><div class="tks">${out.map(o => `<span class="tk ${o.c ? "ch" : ""}">${esc(o.t)}</span>`).join("") || "<span class='empty'>empty</span>"}</div>`;
+  fr([], "The scanner walks the file once, left to right, and turns each piece into a generic token.", vis(-1));
+  toks.forEach((t, i) => {
+    fr([0, 1], `Next piece: "${t}".`, vis(i));
+    let t2 = t, l, why;
+    if (t.startsWith("//")) { fr([2], "A comment: dropped, nothing is output.", vis(i)); return; }
+    if (t[0] === '"' || t[0] === "'") { t2 = "S"; l = [3, 6]; why = "a string becomes S"; }
+    else if (/^\d/.test(t)) { t2 = "N"; l = [4, 6]; why = "a number becomes N"; }
+    else if (/^[A-Za-z_]/.test(t) && !KEYWORDS.has(t)) { t2 = "V"; l = [5, 6]; why = "a variable name becomes V"; }
+    else { l = [5, 6]; why = KEYWORDS.has(t) ? "a keyword is kept as it is" : "punctuation is kept as it is"; }
+    out.push({ t: t2, c: t2 !== t }); fr(l, `${why}. Output so far has ${out.length} token${out.length > 1 ? "s" : ""}.`, vis(i));
+  });
+  fr([], `Done in one pass: ${toks.length} pieces scanned, so the work grows in step with the file size.`, vis(-1));
+  return F;
+}
+
+/* ---------- 10. Set: remove repeats and intersect ---------- */
+function buildSet() {
+  const L1 = SETL ? SETL[0] : [12, 47, 5, 47, 88, 31, 5], L2 = SETL ? SETL[1] : [47, 5, 70, 31, 70], A = new Set(), B = new Set(), sh = new Set(), [F, fr] = mk();
+  const row = (arr, cls = () => "") => `<div class="tks">${arr.map((v, k) => chip(v, cls(v, k))).join("") || "<span class='empty'>empty</span>"}</div>`;
+  let fin = 0; const vis = (i1, i2, hl) => vis0(i1, i2, hl) + KV({ shared: sh.size, "A.size": A.size, "B.size": B.size, sim: fin ? Math.round(100 * sh.size / Math.min(A.size, B.size)) + "%" : null }), vis0 = (i1, i2, hl) => `<b>${SETN[0]} fingerprints (with repeats)</b>${row(L1, (v, k) => k === i1 ? "w" : "")}<b>Set of ${SETN[0]}</b>${row([...A], v => v === hl ? "min" : "")}<b>${SETN[1]} fingerprints</b>${row(L2, (v, k) => k === i2 ? "w" : "")}<b>Set of ${SETN[1]}</b>${row([...B], v => v === hl ? "min" : "")}<b>Shared</b>${row([...sh], () => "kept")}`;
+  fr([0, 1], "A Set keeps each value once and answers 'is it in here?' in about one step.", vis(-1, -1));
+  L1.forEach((v, k) => { const had = A.has(v); A.add(v); fr([0], had ? `${v} is already in Set A, so the repeat is ignored.` : `${v} is new: add it to Set A.`, vis(k, -1, v)); });
+  L2.forEach((v, k) => { const had = B.has(v); B.add(v); fr([1], had ? `${v} is already in Set B, so the repeat is ignored.` : `${v} is new: add it to Set B.`, vis(-1, k, v)); });
+  for (const h of A) { const yes = B.has(h); if (yes) sh.add(h); fr([3, 4], yes ? `${h} is also in Set B: shared.` : `${h} is not in Set B.`, vis(-1, -1, h)); }
+  fin = 1; fr([5], `shared = ${sh.size}. similarity = ${sh.size} / min(${A.size}, ${B.size}) = ${Math.round(100 * sh.size / Math.min(A.size, B.size))}%.`, vis(-1, -1));
+  return F;
+}
+
+/* ---------- 11. Adjacency matrix (the heatmap) ---------- */
+function buildMatrix() {
+  const n = Math.min(5, N.length), nm = N.slice(0, n), pr = QP && QP.pairs.length ? QP.pairs : [[0, 1, 75], [0, 3, 100], [1, 3, 75], [1, 2, 33]];
+  const sim = (a, b) => { const q = pr.find(x => (x[0] === a && x[1] === b) || (x[0] === b && x[1] === a)); return q ? q[2] / 100 : 0; };
+  const M = nm.map(() => Array(n).fill(null)), [F, fr] = mk();
+  const vis = cur => `<table class="dp"><tr><th></th>${nm.map(c => `<th>${c}</th>`).join("")}</tr>${M.map((r, i) => `<tr><th>${nm[i]}</th>${r.map((v, j) => `<td style="${v === null ? "" : `background:rgba(var(--rgb),${v ? 0.12 + v * 0.8 : 0.04})`}" class="${cur === i + "," + j ? "pth" : ""}">${v ? Math.round(v * 100) : ""}</td>`).join("")}</tr>`).join("")}</table>` +
+    KV({ r: cur ? nm[+cur.split(",")[0]] : null, c: cur ? nm[+cur.split(",")[1]] : null, "M[r][c]": cur ? M[+cur.split(",")[0]][+cur.split(",")[1]] : null });
+  fr([0], `${n} files are the nodes of a graph and ${pr.length} similarity links are its edges. A matrix stores every possible link as one cell.`, vis());
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) { M[r][c] = r === c ? 1 : sim(r, c);
+    fr([1, 2, 3, 4], r === c ? `${nm[r]} against itself: always 1.` : M[r][c] ? `${nm[r]} and ${nm[c]} are linked at ${Math.round(M[r][c] * 100)}%. The mirror cell holds the same value.` : `${nm[r]} and ${nm[c]} share nothing: the cell stays empty.`, vis(r + "," + c)); }
+  fr([0], "Dark blocks along the diagonal are copying rings. Looking up any pair is one step, at the cost of n x n cells.", vis());
+  return F;
+}
+
+/* ---------- 12. Hash map as a running maximum ---------- */
+function buildBest() {
+  const PR = QP && QP.pairs.length ? QP.pairs.slice(0, 6) : [[0, 3, 100], [0, 1, 75], [1, 3, 75], [1, 2, 33]], best = new Map(), [F, fr] = mk();
+  const vis = (cp, dir) => `<b>pairs, one at a time</b><div class="kv">${PR.map((p, k) => `<div class="${k === cp ? "hl" : ""}">${N[p[0]]}-${N[p[1]]}<span>${p[2]}%</span></div>`).join("")}</div><b>best match per file (Map)</b><div class="kv">${[...best].map(([x, v]) => `<div class="${x === dir ? "hl" : ""}">${N[x]}<span>${N[v.y]} ${v.s}%</span></div>`).join("") || "empty"}</div>`;
+  fr([0], "An empty Map will hold each file's closest match.", vis(-1, -1));
+  PR.forEach(([a, b, s], k) => [[a, b], [b, a]].forEach(([x, y]) => {
+    const had = best.has(x), old = had ? best.get(x).s : 0, up = !had || old < s; if (up) best.set(x, { y, s });
+    fr(up ? [2, 3, 4] : [2, 3], !had ? `${N[x]} has no entry yet: store ${N[y]} at ${s}%.` : up ? `${N[x]} has ${old}% and ${s}% is higher: replace it with ${N[y]}.` : `${N[x]} has ${old}% and ${s}% is not higher: keep it.`, vis(k, x));
+  }));
+  fr([5], "One pass over the pairs gives every file's closest match. This feeds the 'Most suspicious files' list.", vis(-1, -1));
+  return F;
+}
+
+/* ---------- registry ---------- */
+const RE = /(\/\/.*)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|\b(const|let|function|for|if|else|while|return|class|new|of|continue|constructor)\b|\b(\d+)\b/g;
+function codeFocus(src) {
+  const plain = src.replace(/\/\/.*$/, "");
+  let m;
+  if ((m = /^\s*(?:(?:const|let|var)\s+)?[\w$.]+(?:\[[^\]]+\])?\s*=\s*([^;]+)/.exec(plain))) return [m.index + m[0].lastIndexOf(m[1]), m.index + m[0].lastIndexOf(m[1]) + m[1].length];
+  if ((m = /^\s*if\s*\((.+?)\)/.exec(plain))) return [m.index + m[0].indexOf(m[1]), m.index + m[0].indexOf(m[1]) + m[1].length];
+  if ((m = /^\s*return\s+(.+?);?$/.exec(plain))) return [m.index + m[0].lastIndexOf(m[1]), m.index + m[0].lastIndexOf(m[1]) + m[1].length];
+  if ((m = /^\s*for\s*\((.+?)\)/.exec(plain))) { const fields=m[1].split(";"); const part=fields[1]?.trim()||fields[0].trim(); const at=m.index+m[0].indexOf(part); return [at,at+part.length]; }
+  if ((m = /\b(?:function|class)\s+([\w$]+)/.exec(plain))) return [m.index+m[0].lastIndexOf(m[1]),m.index+m[0].lastIndexOf(m[1])+m[1].length];
+  if ((m = /[\w$]+(?:\.[\w$]+)*(?=\s*\()/.exec(plain))) return [m.index,m.index+m[0].length];
+  if ((m = /[\w$]+/.exec(plain))) return [m.index,m.index+m[0].length];
+  return null;
+}
+function hl(src, active = false) {
+  const focus=active?codeFocus(src):null;
+  if (!focus) { let out="",last=0;src.replace(RE,(m,c,str,k,n,off)=>{out+=esc(src.slice(last,off))+`<i class="${c?"sc":str?"ss":k?"sk":"sn"}">${esc(m)}</i>`;last=off+m.length;return m;});return out+esc(src.slice(last)); }
+  const [a,b]=focus;
+  return hl(src.slice(0,a),false)+`<mark class="code-focus">${esc(src.slice(a,b))}</mark>`+hl(src.slice(b),false);
+}
+const ALGOS = [
+  { id: "rk", what: "Finds a short pattern inside a long text. Instead of comparing letters at every position, it compares one small number (a hash) per window, and only checks letters when the numbers match.", name: "Rabin-Karp string search", src: "Demo code, not part of CopyCatch", where: [["app.js", "kgramHashes() uses the same rolling hash, but over tokens and without the character check, because fingerprints only need to be approximate"]], avg: "O(n + m)", worst: "O(n x m)", note: "Worst case happens when many windows hash like the pattern, for example all A's, so every window needs a full check.",
+    code: ["function rabinKarp(text, pattern) {", "  const n = text.length, m = pattern.length;", "  const base = 256, mod = 101, matches = [];", "  let patternHash = 0, windowHash = 0, h = 1;", "  for (let i = 0; i < m - 1; i++) h = (h * base) % mod;", "  for (let i = 0; i < m; i++) {", "    patternHash = (base * patternHash + pattern.charCodeAt(i)) % mod;", "    windowHash = (base * windowHash + text.charCodeAt(i)) % mod;", "  }", "  for (let i = 0; i <= n - m; i++) {", "    if (patternHash === windowHash &&", "        text.startsWith(pattern, i)) {", "      matches.push(i);", "    }", "    if (i < n - m) {", "      windowHash = (base * (windowHash - text.charCodeAt(i) * h)", "                    + text.charCodeAt(i + m)) % mod;", "      if (windowHash < 0) windowHash += mod;", "    }", "  }", "  return matches;", "}"], build: buildRK,
+    extra: () => `Text <input id="rkt" size="24" value="${esc(RKS.text)}"> Pattern <input id="rkp" size="8" value="${esc(RKS.pat)}"><button id="rkw">Worst case (all A's)</button><button id="rkc">Show a collision</button><button id="rkd">Default</button>`,
+    bind: rb => {
+      const set = (t, p) => { RKS.text = t; RKS.pat = p; RKS.on = t === RKDEF.text; pick("rk"); };
+      $("rkt").oninput = e => { RKS.text = e.target.value; rb(); }; $("rkp").oninput = e => { RKS.pat = e.target.value; rb(); };
+      $("rkw").onclick = () => set("AAAAAAAAAAAA", "AAAA"); $("rkd").onclick = () => set(RKDEF.text, RKDEF.pat);
+      $("rkc").onclick = () => { const H3 = s => [...s].reduce((h, c) => (256 * h + c.charCodeAt(0)) % 101, 0), A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; let f = "";
+        for (const a of A) for (const b of A) for (const c of A) if (!f && a + b + c !== "ABC" && H3(a + b + c) === H3("ABC")) f = a + b + c; set("QQ" + f + "QQABC", "ABC"); };
+    } },
+  { id: "scan", what: "Reads a file once from left to right and turns every piece into a generic token, so renaming a variable no longer changes what the file looks like.", name: "Tokenizer (linear scan)", src: "app.js · tokenize()", where: [["app.js", "tokenize(): reads the file once, drops comments, makes names, numbers and strings generic"]], avg: "O(n)", worst: "O(n)",
+    code: ["while ((m = re.exec(text))) {", "  let t = m[0];", "  if (t.startsWith(\"//\")) continue;", "  if (t[0] === '\"') t = \"S\";", "  else if (/^\\d/.test(t)) t = \"N\";", "  else if (/^[A-Za-z_]/.test(t) && !KEYWORDS.has(t)) t = \"V\";", "  norm.push(t);", "}"], build: buildScan,
+    extra: () => `Code to scan <input id="sct" size="40" value="${esc(SC.text.replace(/\n/g, " "))}">`, bind: rb => $("sct").oninput = e => { SC.text = e.target.value; rb(); } },
+  { id: "map", what: "A hash map is a lookup table. Here it gives every distinct token a number, and finding a token takes about one step no matter how many are stored.", name: "Hash map", src: "app.js · tokenize()", where: [["app.js", "tokenize(): vocab maps token to id"], ["app.js", "analyze(): byHash, index and shared are all maps"]], avg: "O(1) per operation", worst: "O(n) per operation if every key collides",
+    code: ["const vocab = new Map();", "const ids = [];", "for (const t of tokens) {", "  let id = vocab.get(t);", "  if (!id) {", "    id = vocab.size + 1;", "    vocab.set(t, id);", "  }", "  ids.push(id);", "}"], build: buildMap,
+    extra: () => `Code to tokenize <input id="hmt" size="38" value="${esc(HM.text)}">`, bind: rb => $("hmt").oninput = e => { HM.text = e.target.value; rb(); } },
+  { id: "set", what: "A Set stores each value only once and answers 'is it in here?' instantly. Intersecting two sets shows how many fingerprints two files share.", name: "Set (remove repeats, intersect)", src: "Demo code, not part of CopyCatch", where: [["app.js", "KEYWORDS is a Set, checked with KEYWORDS.has(t)"], ["app.js", "analyze(): byHash.size counts a file's unique fingerprints"]], avg: "O(|A| + |B|)", worst: "O(|A| x |B|) if every key collides",
+    code: ["const A = new Set(fingerprintsOfA);", "const B = new Set(fingerprintsOfB);", "let shared = 0;", "for (const h of A)", "  if (B.has(h)) shared++;", "const sim = shared / Math.min(A.size, B.size);"], build: buildSet },
+  { id: "roll", what: "Turns every window of tokens into one number. Sliding the window by one only drops the left token and adds the right one, so the whole file takes a single pass.", name: "Rolling hash over tokens", src: "app.js · kgramHashes()", where: [["app.js", "kgramHashes(): hash of every window of K tokens, base 131, mod 1,000,000,007 (shown here with base 10 and digits)"]], avg: "O(n)", worst: "O(n), plus O(k) setup",
+    code: ["function kgramHashes(ids) {", "  const out = [];", "  if (ids.length < K) return out;", "  let pow = 1;", "  for (let i = 0; i < K - 1; i++)", "    pow = (pow * BASE) % MOD;", "  let h = 0;", "  for (let i = 0; i < K; i++)", "    h = (h * BASE + ids[i]) % MOD;", "  out.push(h);", "  for (let i = 1; i + K <= ids.length; i++) {", "    h = (((h - ids[i - 1] * pow) % MOD + MOD) % MOD", "         * BASE + ids[i + K - 1]) % MOD;", "    out.push(h);", "  }", "  return out;", "}"], build: buildRoll, extra: () => `Tokens (space separated) <input id="rlt" size="34" value="${esc(RL.text)}"> K <input id="rlk" type="number" min="2" max="6" value="${RL.k}" style="width:56px">`, bind: rb => { $("rlt").oninput = e => { RL.text = e.target.value; rb(); }; $("rlk").oninput = e => { RL.k = +e.target.value || 3; rb(); }; } },
+  { id: "win", what: "Keeps only the smallest hash in each window, so each file stores far fewer fingerprints while still catching every long shared run. This is the idea behind MOSS.", name: "Winnowing (sliding window minimum)", src: "app.js · winnow()", where: [["app.js", "winnow(): keep the smallest hash in each window"]], avg: "O(n x w)", worst: "O(n x w), O(n) with a deque",
+    code: ["function winnow(hashes) {", "  const fp = [], w = Math.min(W, hashes.length);", "  let lastPos = -1;", "  for (let i = 0; i + w <= hashes.length; i++) {", "    let min = i;", "    for (let j = i + 1; j < i + w; j++)", "      if (hashes[j] <= hashes[min]) min = j;", "    if (min !== lastPos) {", "      fp.push({ h: hashes[min], pos: min });", "      lastPos = min;", "    }", "  }", "  return fp;", "}"], build: buildWin,
+    extra: () => `<button id="shw">New random hashes</button>`, bind: rb => $("shw").onclick = () => { WN.H = rnd(9, 10, 99); rb(); } },
+  { id: "idx", what: "A table from fingerprint to the files that contain it. Only files that share a row are compared, so unrelated files are never looked at.", name: "Inverted index", src: "app.js · analyze()", where: [["app.js", "analyze(): index maps hash to files, shared counts pairs"]], avg: "O(total fingerprints + shared pairs)", worst: "O(n squared) if one hash is in every file, which is why boilerplate hashes are skipped",
+    code: ["const index = new Map();", "data.forEach((d, i) => d.byHash.forEach((_, h) => {", "  if (!index.has(h)) index.set(h, []);", "  index.get(h).push(i);", "}));", "const shared = new Map();", "index.forEach(list => {", "  for (let x = 0; x < list.length; x++)", "    for (let y = x + 1; y < list.length; y++) {", "      const key = list[x] * data.length + list[y];", "      shared.set(key, (shared.get(key) || 0) + 1);", "    }", "});", "// sim = shared / Math.min(sizeA, sizeB)"], build: buildIndex },
+  { id: "best", what: "Walks through all matching pairs once and remembers the highest similarity for each file, using a map.", name: "Hash map as a running maximum", src: "app.js · render()", where: [["app.js", "render(): finds each file's closest match for the 'Most suspicious files' list"]], avg: "O(p) for p pairs", worst: "O(p)",
+    code: ["const best = new Map();", "pairs.forEach(p => {", "  for (const [x, y] of [[p.a, p.b], [p.b, p.a]])", "    if (!best.has(x) || best.get(x).sim < p.sim)", "      best.set(x, { y, sim: p.sim });", "});"], build: buildBest },
+  { id: "sort", what: "Puts the matching pairs in order so the most similar appear first. Selection sort finds the best item in the unsorted part and swaps it into place, again and again.", name: "Sorting", src: "Demo code (CopyCatch itself calls pairs.sort)", where: [["app.js", "analyze(): pairs.sort((x, y) => y.sim - x.sim) ranks pairs by similarity"], ["app.js", "render(): sorts the most suspicious files"]], avg: "O(n squared) shown here, O(n log n) for the real sort", worst: "O(n squared) shown here", note: "The browser really uses TimSort. Selection sort is shown because it is the clearest way to see sorting. It does the same n squared work even on sorted input.",
+    code: ["// CopyCatch: pairs.sort((x, y) => y.sim - x.sim)", "// The same idea written out as selection sort:", "function selectionSort(a) {", "  for (let i = 0; i < a.length - 1; i++) {", "    let best = i;", "    for (let j = i + 1; j < a.length; j++)", "      if (better(a[j], a[best])) best = j;", "    [a[i], a[best]] = [a[best], a[i]];", "  }", "}"], build: buildSort,
+    extra: () => `<button id="shf">Shuffle</button><label><input type="checkbox" id="dsc" ${S.desc ? "checked" : ""}> highest first (CopyCatch order)</label>`,
+    bind: rb => { $("shf").onclick = () => { S.arr = rnd(7, 10, 99); rb(); }; $("dsc").onchange = e => { S.desc = e.target.checked; rb(); }; } },
+  { id: "lcs", what: "Finds the longest run of lines that appear in both files in the same order. A table is filled cell by cell, then read backwards to find the matching lines.", name: "Dynamic programming (LCS)", src: "app.js · lcsLines()", where: [["app.js", "lcsLines(): fill the table, then backtrack to find matching lines"]], avg: "O(m x n) time and memory", worst: "O(m x n) time and memory",
+    code: ["function lcsLines(A, B) {", "  const m = A.length, n = B.length, w = n + 1;", "  const dp = new Uint16Array((m + 1) * w);", "  for (let i = 1; i <= m; i++)", "    for (let j = 1; j <= n; j++)", "      dp[i * w + j] = A[i - 1].s === B[j - 1].s", "        ? dp[(i - 1) * w + j - 1] + 1", "        : Math.max(dp[(i - 1) * w + j], dp[i * w + j - 1]);", "  // backtrack from dp[m * w + n] to read the matches", "}"], build: buildLcs },
+  { id: "uf", what: "Keeps track of which files belong to the same copying ring. Each file points toward a root, and shortcuts keep the chains short.", name: "Union-Find (disjoint sets)", src: "app.js · class UnionFind", where: [["app.js", "class UnionFind: find with path halving, and union"], ["app.js", "render(): links flagged pairs into rings"]], avg: "O(log n) amortised with path halving", worst: "O(n) for one find on a long chain",
+    code: ["class UnionFind {", "  constructor(n) {", "    this.p = Array.from({ length: n }, (_, i) => i);", "  }", "  find(x) {", "    while (this.p[x] !== x) {", "      this.p[x] = this.p[this.p[x]];", "      x = this.p[x];", "    }", "    return x;", "  }", "  union(a, b) { this.p[this.find(a)] = this.find(b); }", "}"], build: buildUF },
+  { id: "matrix", what: "The same similarity graph stored as a grid: one cell for every pair of files. This is what the heatmap draws.", name: "Graph as an adjacency matrix", src: "app.js · drawHeat()", where: [["app.js", "drawHeat(): the heatmap is the similarity graph stored as a matrix"], ["app.js", "drawRings(): the same graph drawn as nodes and edges"]], avg: "O(n x n) to build, O(1) per lookup", worst: "O(n x n) memory",
+    code: ["const ids = gList.flatMap(g => [...g]);", "for (const r of ids)", "  for (const c of ids) {", "    const s = r === c ? 1 : sim(r, c);", "    paintCell(r, c, s);", "  }"], build: buildMatrix },
+  { id: "race", what: "Comparing every file with every other grows very fast. The index only compares files that share a fingerprint, so the work grows far more slowly.", name: "Why the index wins", src: "app.js · analyze()", where: [["app.js", "analyze(): the index avoids comparing every pair of files"]], avg: "index: about n x s pairs (s = files sharing a fingerprint)", worst: "every pair: n(n-1)/2",
+    code: ["// naive: compare every file with every other", "for (let a = 0; a < data.length; a++)", "  for (let b = a + 1; b < data.length; b++)", "    compare(a, b);   // n(n-1)/2 checks", "// CopyCatch: only pairs that share a fingerprint", "index.forEach(list => { /* pair up list */ });"], build: buildRace }
+];
+
+let cur, frames = [], fi = 0, timer = null, ALL = false, AUTO = false, PAUSED = false;
+function stop() { clearTimeout(timer); timer = null; $("pl").textContent = "Play"; }
+function pulse(el) { if (el && el.classList) { el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse"); } }
+function sync(a, b) {
+  const A = [...a.childNodes], B = [...b.childNodes];
+  B.forEach((nb, i) => { const na = A[i];
+    if (!na) { const c = nb.cloneNode(true); if (c.classList) c.classList.add("new"); a.appendChild(c); return; }
+    if (na.nodeName !== nb.nodeName) { a.replaceChild(nb.cloneNode(true), na); return; }
+    if (nb.nodeType === 3) { if (na.nodeValue !== nb.nodeValue) { na.nodeValue = nb.nodeValue; pulse(na.parentNode); } return; }
+    if (na.className !== nb.className) na.className = nb.className;
+    const st = nb.getAttribute("style") || ""; if ((na.getAttribute("style") || "") !== st) na.setAttribute("style", st);
+    sync(na, nb); });
+  A.slice(B.length).forEach(n => n.remove());
+}
+function morph(el, html) { const t = document.createElement("div"); t.innerHTML = html; sync(el, t); }
+function show() {
+  const f = frames[fi];
+  $("code").innerHTML = `<div class="chd"><span>${esc(cur.src)}</span><span>JavaScript</span></div>` + cur.code.map((l, i) => `<div class="cl ${f.lines.includes(i) ? "on" : ""}"><b>${i + 1}</b><code>${hl(l,f.lines.includes(i))}</code></div>`).join("");
+  const V = $("vis"); if (V.dataset.alg !== cur.id) { V.innerHTML = f.html; V.dataset.alg = cur.id; } else morph(V, f.html); $("msg").innerHTML = f.msg;
+  $("sl").max = frames.length - 1; $("sl").value = fi; $("cnt").textContent = `Step ${fi + 1} of ${frames.length}`;
+  { const ki = ALGOS.indexOf(cur); $("mbi").style.width = ((ki + (fi + 1) / frames.length) / ALGOS.length * 100) + "%"; $("mtx").textContent = `Method ${ki + 1} of ${ALGOS.length}: ${TAB[cur.id]}`; }
+}
+const rebuild = () => { stop(); frames = cur.build(); fi = 0; show(); };
+function srcBar() {
+  const T = QP && QP.top, nm = i => esc(QP.A.data[i].name), pc = T ? Math.round(T.sim <= 1 ? T.sim * 100 : T.sim) : 0;
+  $("src").innerHTML = (QP ? `Every animation here runs on <b>${esc(SRC || "your files")}</b> (${QP.A.data.length} files).` + (T ? ` Top suspect pair: <b>${nm(T.a)}</b> and <b>${nm(T.b)}</b>, ${pc}% similar.` : " No similar pair was found, so the animations show how each method treats your files.") : "Showing built-in demo data.") + (QP && PERS[cur.id] ? ` This animation is built from <b>${esc(PERS[cur.id])}</b>.` : "")
+    + ` <button onclick="document.getElementById('files').click()">Use my own files</button>`;
+}
+function pick(id, scroll) {
+  if (!AUTO) endAll(); prep(); stop(); cur = ALGOS.find(a => a.id === id);
+  $("panel").hidden = false; $("pt").textContent = (ALGOS.indexOf(cur) + 1) + ". " + cur.name; $("pwhy").innerHTML = WHY[cur.id] ? "<b>How this catches copying:</b> " + WHY[cur.id] : ""; $("pwhat").textContent = cur.what.replace(/^(.*?\.)\s.*$/, "$1"); srcBar();
+  document.querySelectorAll("#tabs button").forEach(b => { b.classList.toggle("on", b.dataset.id === id); b.classList.toggle("done", ALL && ALGOS.findIndex(a => a.id === b.dataset.id) < ALGOS.indexOf(cur)); });
+  $("pw").innerHTML = cur.where.map(([f, d]) => `<div>Used in <code>${f}</code>: ${d}</div>`).join("") + `<div>Average: <b>${cur.avg}</b> &nbsp; Worst case: <b>${cur.worst}</b></div>` + (cur.note ? `<div>${cur.note}</div>` : "");
+  $("extra").innerHTML = cur.extra ? cur.extra() : ""; if (cur.bind) cur.bind(rebuild);
+  document.querySelectorAll("#over tr").forEach(r => r.classList.toggle("on", r.dataset.id === id));
+  rebuild(); if (scroll) $("tabs").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+$("over").innerHTML = `<tr><th>Concept</th><th>Where in CopyCatch</th><th>Average</th><th>Worst case</th><th></th></tr>` +
+  ALGOS.map(a => `<tr data-id="${a.id}"><td><b>${a.name}</b></td><td>${a.where.map(([f, d]) => `<code>${f}</code> ${d}`).join("<br>")}</td><td>${a.avg}</td><td>${a.worst}</td><td><button onclick="pick('${a.id}', 1)">▶ Watch</button></td></tr>`).join("");
+const TAB = { rk: "Rabin-Karp", scan: "Tokenizer", map: "Hash map", set: "Set", roll: "Rolling hash", win: "Winnowing", idx: "Inverted index", best: "Running max", sort: "Sorting", lcs: "LCS", uf: "Union-Find", matrix: "Matrix", race: "Why the index wins" };
+$("tabs").innerHTML = ALGOS.map((a, i) => `<button data-id="${a.id}" onclick="pick('${a.id}')"><b>${i + 1}</b>${TAB[a.id]}</button>`).join("");
+function tick() { if (fi < frames.length - 1) { fi++; show(); timer = setTimeout(tick, +$("sp").value); } else { stop(); adv(); } }
+$("pl").onclick = () => { endAll(); if (timer) return stop(); if (fi >= frames.length - 1) fi = 0; $("pl").textContent = "Pause"; show(); timer = setTimeout(tick, +$("sp").value); };
+$("nx").onclick = () => { endAll(); stop(); if (fi < frames.length - 1) fi++; show(); };
+$("pv").onclick = () => { endAll(); stop(); if (fi > 0) fi--; show(); };
+$("rs").onclick = () => { endAll(); stop(); fi = 0; show(); };
+$("sl").oninput = e => { endAll(); stop(); fi = +e.target.value; show(); };
+const WHY = { rk: "A student copies one line from a friend. Rabin-Karp checks whether a snippet from one file appears inside another, using one small number per window instead of comparing every letter.",
+  scan: "Renaming variables is the oldest trick to hide copying. Turning every name into V makes a renamed copy look identical to the original.",
+  map: "Gives every kind of token a number, so a file becomes a list of numbers that is fast to compare.",
+  set: "Each file's fingerprints form a set. The more fingerprints two files share, the more likely one was copied from the other.",
+  roll: "Turns every run of tokens into one number. Identical code gives identical numbers, even in different files and after renaming.",
+  win: "Keeps only a guaranteed-enough sample of each file's numbers, so hundreds of files stay cheap to store and compare.",
+  idx: "Instead of comparing every file with every other, it looks up who shares each fingerprint. Only possible copiers are ever compared.",
+  best: "Finds each student's closest match. This is what fills the Most suspicious files list.",
+  sort: "Puts the most similar pairs first, so the teacher reads the worst cases first.",
+  lcs: "Lines up two files and marks exactly which lines were copied, even if some lines were added, removed or moved.",
+  uf: "Joins files into copying rings. If A copied B and B copied C, all three land in one group.",
+  matrix: "Shows every pair at once as a heatmap. Dark blocks along the diagonal are copying rings.",
+  race: "Shows why the tool stays fast with hundreds of files: it only looks at pairs that share a fingerprint." };
+function endAll() { ALL = false; PAUSED = false; $("pa").textContent = "▶ Play all " + ALGOS.length + " methods"; }
+function go1() { $("pl").textContent = "Pause"; show(); timer = setTimeout(tick, +$("sp").value); }
+function adv() {
+  if (!ALL) return; const k = ALGOS.indexOf(cur);
+  if (k >= ALGOS.length - 1) { ALL = false; $("pa").textContent = "↻ Play the tour again"; return; }
+  timer = setTimeout(() => { if (!ALL) return; AUTO = true; pick(ALGOS[k + 1].id); AUTO = false; go1(); }, 1100);
+}
+$("pa").onclick = () => {
+  document.querySelector(".lab-workspace").scrollIntoView({behavior:"smooth",block:"start"});
+  if (!analysis) $("sample").click();
+  if (ALL) { ALL = false; PAUSED = true; stop(); $("pa").textContent = "▶ Resume the tour"; return; }
+  ALL = true; $("pa").textContent = "⏸ Pause the tour";
+  if (!PAUSED) { AUTO = true; pick(ALGOS[0].id); AUTO = false; } PAUSED = false;
+  if (frames.length && fi >= frames.length - 1) adv(); else go1();
+};
+$("pn").onclick = () => { const k = ALGOS.indexOf(cur); if (k >= ALGOS.length - 1) return; clearTimeout(timer); AUTO = true; pick(ALGOS[k + 1].id); AUTO = false; if (ALL) go1(); };
+
+pick("rk");
+if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) setTimeout(() => $("pl").click(), 700);
+
+const navLbl = t => t.startsWith("⏸") ? "⏸ Pause" : t.startsWith("▶ Resume") ? "▶ Resume" : t.startsWith("↻") ? "↻ Replay" : "▶ Play";
+window.pick=pick;
+})();
+const views={'index.html':'v1','how.html':'v2','dsa.html':'v3'};
+function hasDetectorBatch(){try{const x=sessionStorage.getItem('copycatch-lab-files-v1');if(x&&JSON.parse(x).length)return true}catch{}try{return window.name.startsWith('copycatch-lab:')&&JSON.parse(window.name.slice(14)).length>0}catch{}return false}
+function go(v){document.querySelectorAll('.view').forEach(e=>e.hidden=e.id!==v);document.querySelectorAll('.pv a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));window.scrollTo(0,0);if(v==='v3'&&window.labRefresh){if(!analysis&&!hasDetectorBatch())$("sample").click();if(analysis)window.labRefresh()}}
+document.addEventListener('click',e=>{const a=e.target.closest('a[data-v]');if(!a)return;const v=a.dataset.v||views[(a.getAttribute('href')||'').split('/').pop()];if(v){e.preventDefault();go(v)}});
+window.go=go;go('v3');
+})();</script><script src="how.js"></script></body></html>
